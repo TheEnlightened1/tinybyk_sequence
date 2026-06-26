@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TinyByk — scroll sequence</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Hanken+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#FAFBFD; --ink:#1A2230; --slate:#586071; --mute:#8A94A3;
+    --blue:#8FB7E2; --blue-ln:#6E9BCB; --line:#E7ECF3; --dark:#15191F; --dark-ink:#EDF1F7;
+    --serif:"Fraunces",Georgia,serif; --sans:"Hanken Grotesk",system-ui,sans-serif; --mono:"IBM Plex Mono",monospace;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 32px; }
+  h1,h2{ font-family:var(--serif); font-weight:340; letter-spacing:-.015em; }
+  .eyebrow{ font-family:var(--mono); font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:var(--blue-ln); }
+
+  .intro{ padding:clamp(5rem,12vw,9rem) 0 clamp(2rem,5vw,3rem); }
+  .intro .eyebrow{ margin-bottom:1.4rem; }
+  .intro h1{ font-size:clamp(2.2rem,5.5vw,3.8rem); line-height:1.05; max-width:17ch; }
+  .intro h1 em{ font-style:italic; color:var(--blue-ln); }
+  .intro p{ margin-top:1.4rem; max-width:50ch; color:var(--slate); }
+
+  .stage{ height:340vh; position:relative; }
+  .sticky{ position:sticky; top:0; height:100vh; overflow:hidden; background:var(--paper); }
+  canvas#seq{ display:block; width:100%; height:100%; }
+
+  .tag-tl{ position:absolute; left:28px; top:24px; font-family:var(--mono); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); }
+  .cue{ position:absolute; left:50%; transform:translateX(-50%); bottom:74px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); transition:opacity .4s ease; }
+  .cue .ln{ width:1px; height:26px; background:linear-gradient(var(--blue-ln),transparent); }
+
+  .dock{ position:absolute; left:28px; right:28px; bottom:22px; }
+  .dockrow{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--slate); margin-bottom:8px; }
+  .dockrow b{ color:var(--blue-ln); font-weight:500; }
+  canvas#buf{ display:block; width:100%; height:6px; }
+
+  footer{ border-top:1px solid var(--line); padding:30px 0 44px; font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); text-align:center; }
+</style>
+</head>
+<body>
+
+<section class="intro">
+  <div class="wrap">
+    <div class="eyebrow">TinyByk &middot; scroll sequence</div>
+    <h1>See the bike come together as you <em>scroll.</em></h1>
+    <p>A live render from your Keyshot animation, with a transparent background so it sits directly on the page. Frames load progressively — nearest to your scroll position first.</p>
+  </div>
+</section>
+
+<section class="stage" id="stage">
+  <div class="sticky">
+    <canvas id="seq"></canvas>
+    <div class="tag-tl">TinyByk exploded animation</div>
+    <div class="cue" id="cue"><span class="ln"></span>Scroll</div>
+    <div class="dock">
+      <div class="dockrow">
+        <span>FRAME <b id="fnum">001</b> / <span id="ftot">046</span></span>
+        <span>LOADED <b id="bufpct">000</b> / <span id="ftot2">046</span></span>
+      </div>
+      <canvas id="buf"></canvas>
+    </div>
+  </div>
+</section>
+
+<footer>Congruent Technologies &middot; TinyByk sequence</footer>
+
+<script>
+(function(){
+  // ============================================================
+  // CONFIG — TinyByk PNG frames 116–161 (46 total), reversed playback
+  // ============================================================
+  const CONFIG = {
+    frameCount:     46,
+    useRealImages:  true,
+    simulateLoading: false,
+    framePath: (i) => `Frames2PNG/ExplodedAnimationLANDINGPAGE1.50.${116+i}.png`,
+    eager:          6,
+    maxConcurrent:  4,
+    scrollSpan:     340,
+    reverse:        true   // scroll plays the sequence backwards
+  };
+
+  const BG = '#FAFBFD';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const canvas=document.getElementById('seq'), ctx=canvas.getContext('2d');
+  const buf=document.getElementById('buf'), bctx=buf.getContext('2d');
+  const stage=document.getElementById('stage'), cue=document.getElementById('cue');
+  const fnum=document.getElementById('fnum'), bufpct=document.getElementById('bufpct');
+  const N=CONFIG.frameCount;
+  document.getElementById('ftot').textContent=String(N).padStart(3,'0');
+  document.getElementById('ftot2').textContent=String(N).padStart(3,'0');
+  stage.style.height=CONFIG.scrollSpan+'vh';
+
+  const status=new Array(N).fill(0);
+  const images=new Array(N);
+  let inFlight=0;
+
+  let W=0,H=0,dpr=1;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    W=canvas.clientWidth; H=canvas.clientHeight;
+    canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    buf.width=buf.clientWidth*dpr; buf.height=buf.clientHeight*dpr; bctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  let cur=0, dir=1;
+  function pickNext(){
+    let best=-1, bestCost=Infinity;
+    for(let i=0;i<N;i++){
+      if(status[i]!==0) continue;
+      let cost=Math.abs(i-cur);
+      const ahead=(dir>=0 && i>=cur)||(dir<0 && i<=cur);
+      if(ahead) cost*=0.45;
+      if(i<CONFIG.eager) cost-=10000;
+      if(cost<bestCost){ bestCost=cost; best=i; }
+    }
+    return best;
+  }
+  function loadOne(i){
+    const done=ok=>{ status[i]=ok?2:3; inFlight--; pump(); };
+    const im=new Image();
+    im.onload=()=>{ images[i]=im; done(true); };
+    im.onerror=()=>done(false);
+    im.src=CONFIG.framePath(i);
+  }
+  function pump(){
+    while(inFlight<CONFIG.maxConcurrent){
+      const i=pickNext(); if(i<0) break;
+      status[i]=1; inFlight++; loadOne(i);
+    }
+  }
+
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  function nearestReady(i){
+    if(status[i]===2) return i;
+    for(let d=1;d<N;d++){
+      if(i-d>=0 && status[i-d]===2) return i-d;
+      if(i+d<N  && status[i+d]===2) return i+d;
+    }
+    return -1;
+  }
+  function drawWaiting(){
+    ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(110,155,203,.55)'; ctx.font='13px "IBM Plex Mono", monospace';
+    ctx.textAlign='center'; ctx.fillText('LOADING…', W/2, H/2); ctx.textAlign='left';
+  }
+  function containDraw(img){
+    ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+    const ir=img.width/img.height, cr=W/H; let dw,dh;
+    if(ir>cr){ dw=W; dh=W/ir; } else { dh=H; dw=H*ir; }
+    ctx.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh);
+  }
+  function drawIndex(i){
+    i=clamp(Math.round(i),0,N-1);
+    const j=nearestReady(i);
+    if(j<0){ drawWaiting(); }
+    else { if(images[j]) containDraw(images[j]); else drawWaiting(); }
+    fnum.textContent=String(i+1).padStart(3,'0');
+  }
+  function drawBuf(){
+    const bw=buf.clientWidth, bh=buf.clientHeight; bctx.clearRect(0,0,bw,bh);
+    const seg=bw/N;
+    for(let i=0;i<N;i++){
+      bctx.fillStyle = status[i]===2 ? 'rgba(110,155,203,.9)'
+                     : status[i]===1 ? 'rgba(110,155,203,.4)'
+                     : status[i]===3 ? 'rgba(214,120,120,.5)'
+                     : 'rgba(26,34,48,.1)';
+      bctx.fillRect(i*seg,0,Math.max(1,seg-1),bh);
+    }
+    const cxp=clamp(cur/(N-1),0,1)*bw;
+    bctx.fillStyle='#1A2230'; bctx.fillRect(cxp-1,0,2,bh);
+  }
+
+  let target=0, lastCur=0, lastBuffered=-1;
+  function progress(){
+    const top=stage.getBoundingClientRect().top;
+    const total=stage.offsetHeight-window.innerHeight;
+    return clamp(-top/total,0,1);
+  }
+  function loop(){
+    const p=progress();
+    // reverse playback: scroll down counts frames backwards (N-1 → 0)
+    target = CONFIG.reverse ? (1-p)*(N-1) : p*(N-1);
+    cur += (target-cur)*0.14; if(Math.abs(target-cur)<0.01) cur=target;
+    dir = cur>=lastCur ? 1 : -1; lastCur=cur;
+    pump();
+    drawIndex(cur);
+    drawBuf();
+    const buffered=status.filter(s=>s===2).length;
+    if(buffered!==lastBuffered){ bufpct.textContent=String(buffered).padStart(3,'0'); lastBuffered=buffered; }
+    if(p>0.02) cue.style.opacity=0; else cue.style.opacity=0.5;
+    requestAnimationFrame(loop);
+  }
+
+  function start(){
+    resize();
+    if(reduce){
+      const mid=Math.floor(N/2);
+      status[mid]=1; inFlight++;
+      loadOne(mid);
+      const iv=setInterval(()=>{ drawIndex(mid); drawBuf();
+        if(status[mid]===2||status[mid]===3){ clearInterval(iv); } },120);
+      return;
+    }
+    pump();
+    requestAnimationFrame(loop);
+  }
+  window.addEventListener('resize', resize);
+  start();
+})();
+</script>
+
+</body>
+</html>
