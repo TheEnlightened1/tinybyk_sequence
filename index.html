@@ -188,7 +188,7 @@
     const p=progress();
     // reverse playback: scroll down counts frames backwards (N-1 → 0)
     target = CONFIG.reverse ? (1-p)*(N-1) : p*(N-1);
-    cur += (target-cur)*0.14; if(Math.abs(target-cur)<0.01) cur=target;
+    cur += (target-cur)*0.35; if(Math.abs(target-cur)<0.01) cur=target;
     dir = cur>=lastCur ? 1 : -1; lastCur=cur;
     pump();
     drawIndex(cur);
