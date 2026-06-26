@@ -80,9 +80,9 @@
     useRealImages:  true,
     simulateLoading: false,
     framePath: (i) => `Frames2PNG/ExplodedAnimationLANDINGPAGE1.50.${116+i}.png`,
-    eager:          23,
+    eager:          6,
     maxConcurrent:  4,
-    scrollSpan:     340,
+    scrollSpan:     200,
     reverse:        true   // scroll plays the sequence backwards
   };
 
@@ -188,7 +188,7 @@
     const p=progress();
     // reverse playback: scroll down counts frames backwards (N-1 → 0)
     target = CONFIG.reverse ? (1-p)*(N-1) : p*(N-1);
-    cur += (target-cur)*2.2; if(Math.abs(target-cur)<0.01) cur=target;
+    cur += (target-cur)*1.9; if(Math.abs(target-cur)<0.01) cur=target;
     dir = cur>=lastCur ? 1 : -1; lastCur=cur;
     pump();
     drawIndex(cur);
