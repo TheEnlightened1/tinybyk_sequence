@@ -4,11 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TinyByk — scroll sequence</title>
- 
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
- 
+
 <style>
   :root{
     --paper:#FAFBFD; --ink:#1A2230; --slate:#586071; --mute:#8A94A3;
@@ -20,22 +20,22 @@
   .wrap{ max-width:1080px; margin:0 auto; padding:0 32px; }
   h1,h2{ font-family:var(--serif); font-weight:340; letter-spacing:-.015em; }
   .eyebrow{ font-family:var(--mono); font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:var(--blue-ln); }
- 
+
   .intro{ padding:clamp(5rem,12vw,9rem) 0 clamp(2rem,5vw,3rem); }
   .intro .eyebrow{ margin-bottom:1.4rem; }
   .intro h1{ font-size:clamp(2.2rem,5.5vw,3.8rem); line-height:1.05; max-width:17ch; }
   .intro h1 em{ font-style:italic; color:var(--blue-ln); }
   .intro p{ margin-top:1.4rem; max-width:50ch; color:var(--slate); }
- 
+
   .stage{ height:340vh; position:relative; }
   .sticky{ position:sticky; top:0; height:100vh; overflow:hidden; background:var(--paper); }
   .driftwrap{ position:absolute; inset:0; will-change:transform; }
   canvas#seq{ display:block; width:100%; height:100%; }
- 
+
   .tag-tl{ position:absolute; left:28px; top:24px; font-family:var(--mono); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); z-index:5; }
   .cue{ position:absolute; left:50%; transform:translateX(-50%); bottom:74px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); transition:opacity .4s ease; z-index:5; }
   .cue .ln{ width:1px; height:26px; background:linear-gradient(var(--blue-ln),transparent); }
- 
+
   /* ---------- taglines positioned relative to the IMAGE box, not the screen ---------- */
   .overlay{
     position:absolute;
@@ -53,18 +53,18 @@
   .bx.r{ top:0; right:0; width:1.5px; height:0; }
   .bx.b{ bottom:0; right:0; height:1.5px; width:0; }
   .bx.l{ bottom:0; left:0; width:1.5px; height:0; }
- 
+
   .tagline{
     font-family:var(--sans); font-weight:500; font-size:clamp(1.15rem,2.6vw,1.9rem); line-height:1.15; letter-spacing:-.01em; text-align:left;
     color:var(--ink); will-change:transform; opacity:0;
   }
   .tagline em{ font-style:normal; color:var(--blue-ln); }
   @media (max-width:760px){ .tagline-zone{ margin-left:6%; margin-bottom:6%; } }
- 
+
   .dock{ position:absolute; left:28px; right:28px; bottom:22px; z-index:5; }
   .dockrow{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--slate); margin-bottom:8px; }
   .dockrow b{ color:var(--blue-ln); font-weight:500; }
- 
+
   .content{ padding:clamp(4rem,9vw,7rem) 0; border-top:1px solid var(--line); }
   .content .eyebrow{ margin-bottom:1rem; }
   .content h2{ font-size:clamp(1.7rem,4vw,2.7rem); max-width:18ch; }
@@ -77,12 +77,12 @@
   @media (max-width:680px){ .content .specs{ grid-template-columns:1fr; } }
   .fade{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
   .fade.in{ opacity:1; transform:none; }
- 
+
   footer{ border-top:1px solid var(--line); padding:30px 0 44px; font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); text-align:center; }
 </style>
 </head>
 <body>
- 
+
 <section class="intro">
   <div class="wrap">
     <div class="eyebrow">TinyByk &middot; scroll sequence</div>
@@ -90,12 +90,12 @@
     <p>A live render from your Keyshot animation, with a transparent background so it sits directly on the page. Frames load progressively — nearest to your scroll position first.</p>
   </div>
 </section>
- 
+
 <section class="stage" id="stage">
   <div class="sticky">
     <div class="driftwrap" id="driftwrap">
       <canvas id="seq"></canvas>
- 
+
       <div class="overlay" id="overlay">
         <!-- EDIT: each line rises into place once scroll passes its data-from point (0–1). They stay, accumulating. -->
         <div class="tagline-zone">
@@ -106,12 +106,12 @@
         </div>
       </div>
     </div>
- 
+
     <div class="tag-tl">TinyByk exploded animation</div>
     <div class="cue" id="cue"><span class="ln"></span>Scroll</div>
   </div>
 </section>
- 
+
 <section class="content">
   <div class="wrap">
     <div class="eyebrow fade">Why it exists</div>
@@ -119,7 +119,7 @@
     <p class="fade">TinyByk packs a full-size ride into the smallest footprint we could engineer — without the wobble, flex, or cut corners that make small rideables feel cheap. Every joint is load-rated, every interface is toleranced, and the whole thing folds down to something you can carry.</p>
   </div>
 </section>
- 
+
 <section class="content">
   <div class="wrap">
     <div class="eyebrow fade">The numbers</div>
@@ -132,7 +132,7 @@
     <p class="fade" style="margin-top:2rem;">Placeholder figures — swap these for your real spec numbers once they're locked.</p>
   </div>
 </section>
- 
+
 <section class="content">
   <div class="wrap">
     <div class="eyebrow fade">Coming soon</div>
@@ -140,9 +140,9 @@
     <p class="fade">Launching February 2027. This page is an early look — the full campaign, pricing, and reward tiers are on the way.</p>
   </div>
 </section>
- 
+
 <footer>Congruent Technologies &middot; TinyByk sequence</footer>
- 
+
 <script>
 (function(){
   // ============================================================
@@ -152,7 +152,7 @@
     frameCount:     39,
     useRealImages:  true,
     simulateLoading: false,
-    framePath: (i) => `Frames6PNG/ExplodedAnimationLANDINGPAGE1.62.${112+i}.png`,
+    framePath: (i) => `webp_output/ExplodedAnimationLANDINGPAGE1.62.${112+i}.webp`,
     eager:          6,
     maxConcurrent:  4,
     scrollSpan:     160,
@@ -160,10 +160,10 @@
     lerp:           1.9,
     imageAspect:    1280/2048   // portrait — used to size the tagline zone to the visible image area
   };
- 
+
   const BG = '#FAFBFD';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
- 
+
   const canvas=document.getElementById('seq'), ctx=canvas.getContext('2d');
   const stage=document.getElementById('stage'), cue=document.getElementById('cue');
   const overlay=document.getElementById('overlay');
@@ -171,11 +171,11 @@
   const panels=[...document.querySelectorAll('.tagline')];
   const N=CONFIG.frameCount;
   stage.style.height=CONFIG.scrollSpan+'vh';
- 
+
   const status=new Array(N).fill(0);
   const images=new Array(N);
   let inFlight=0;
- 
+
   let W=0,H=0,dpr=1;
   function resize(){
     dpr=Math.min(window.devicePixelRatio||1,2);
@@ -183,7 +183,7 @@
     canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
     positionOverlay();
   }
- 
+
   // calculate where the contained image actually sits inside the canvas,
   // then position the overlay to match its bottom-left corner and width.
   function positionOverlay(){
@@ -196,7 +196,7 @@
     overlay.style.setProperty('--img-bottom',bottom+'px');
     overlay.style.setProperty('--img-w',     dw+'px');
   }
- 
+
   // ============================================================
   // PROGRESSIVE LOADER
   // ============================================================
@@ -226,7 +226,7 @@
       status[i]=1; inFlight++; loadOne(i);
     }
   }
- 
+
   // ============================================================
   // DRAWING
   // ============================================================
@@ -257,7 +257,7 @@
     if(j<0){ drawWaiting(); }
     else { if(images[j]) containDraw(images[j]); else drawWaiting(); }
   }
- 
+
   // Each tagline travels up from below into its resting spot; a box draws around them.
   const box={ t:document.querySelector('.bx.t'), r:document.querySelector('.bx.r'),
               b:document.querySelector('.bx.b'), l:document.querySelector('.bx.l') };
@@ -281,7 +281,7 @@
       box.l.style.height = seg(3)+'%';
     }
   }
- 
+
   // ============================================================
   // SCROLL → FRAME loop
   // ============================================================
@@ -306,7 +306,7 @@
     if(p>0.02) cue.style.opacity=0; else cue.style.opacity=0.5;
     requestAnimationFrame(loop);
   }
- 
+
   function start(){
     resize();
     if(reduce){
@@ -322,7 +322,7 @@
   }
   window.addEventListener('resize', resize);
   start();
- 
+
   // content fade-ins
   const fades=[...document.querySelectorAll('.fade')];
   if('IntersectionObserver' in window){
@@ -335,6 +335,6 @@
   }
 })();
 </script>
- 
+
 </body>
 </html>
