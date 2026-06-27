@@ -4,11 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TinyByk — scroll sequence</title>
-
+ 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Hanken+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+ 
 <style>
   :root{
     --paper:#FAFBFD; --ink:#1A2230; --slate:#586071; --mute:#8A94A3;
@@ -20,31 +20,56 @@
   .wrap{ max-width:1080px; margin:0 auto; padding:0 32px; }
   h1,h2{ font-family:var(--serif); font-weight:340; letter-spacing:-.015em; }
   .eyebrow{ font-family:var(--mono); font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:var(--blue-ln); }
-
+ 
   .intro{ padding:clamp(5rem,12vw,9rem) 0 clamp(2rem,5vw,3rem); }
   .intro .eyebrow{ margin-bottom:1.4rem; }
   .intro h1{ font-size:clamp(2.2rem,5.5vw,3.8rem); line-height:1.05; max-width:17ch; }
   .intro h1 em{ font-style:italic; color:var(--blue-ln); }
   .intro p{ margin-top:1.4rem; max-width:50ch; color:var(--slate); }
-
+ 
   .stage{ height:340vh; position:relative; }
   .sticky{ position:sticky; top:0; height:100vh; overflow:hidden; background:var(--paper); }
   canvas#seq{ display:block; width:100%; height:100%; }
-
-  .tag-tl{ position:absolute; left:28px; top:24px; font-family:var(--mono); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); }
-  .cue{ position:absolute; left:50%; transform:translateX(-50%); bottom:74px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); transition:opacity .4s ease; }
+ 
+  .tag-tl{ position:absolute; left:28px; top:24px; font-family:var(--mono); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); z-index:5; }
+  .cue{ position:absolute; left:50%; transform:translateX(-50%); bottom:74px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); transition:opacity .4s ease; z-index:5; }
   .cue .ln{ width:1px; height:26px; background:linear-gradient(var(--blue-ln),transparent); }
-
-  .dock{ position:absolute; left:28px; right:28px; bottom:22px; }
+ 
+  /* ---------- stacked taglines: rise in and accumulate, bottom-left ---------- */
+  .overlay{ position:absolute; inset:0; z-index:4; pointer-events:none; }
+  .tagline-zone{ position:absolute; left:6%; right:auto; bottom:12%; display:flex; flex-direction:column; align-items:flex-start; gap:.5em; padding:0 12px 0 0; max-width:600px; }
+  .tagline{
+    font-family:var(--serif); font-weight:360; font-size:clamp(1.5rem,4.2vw,2.7rem); line-height:1.12; text-align:left;
+    color:var(--ink); opacity:1; transform:translateY(40px); transition:transform 1.05s cubic-bezier(.16,.84,.22,1);
+  }
+  .tagline em{ font-style:italic; color:var(--blue-ln); }
+  .tagline.show{ transform:translateY(0); }
+  @media (max-width:760px){ .tagline-zone{ left:7%; right:7%; bottom:16%; max-width:none; } }
+ 
+  .dock{ position:absolute; left:28px; right:28px; bottom:22px; z-index:5; }
   .dockrow{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--slate); margin-bottom:8px; }
   .dockrow b{ color:var(--blue-ln); font-weight:500; }
   canvas#buf{ display:block; width:100%; height:6px; }
-
+ 
+  /* ---------- normal content sections below the animation ---------- */
+  .content{ padding:clamp(4rem,9vw,7rem) 0; border-top:1px solid var(--line); }
+  .content .eyebrow{ margin-bottom:1rem; }
+  .content h2{ font-size:clamp(1.7rem,4vw,2.7rem); max-width:18ch; }
+  .content h2 em{ font-style:italic; color:var(--blue-ln); }
+  .content p{ margin-top:1.2rem; max-width:54ch; color:var(--slate); }
+  .content .specs{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:2.4rem; }
+  .content .spec{ background:var(--paper); padding:1.6rem 1.4rem; }
+  .content .spec .k{ font-family:var(--mono); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--mute); }
+  .content .spec .val{ font-family:var(--serif); font-style:italic; font-size:clamp(1.5rem,3vw,2.1rem); margin-top:.5rem; }
+  @media (max-width:680px){ .content .specs{ grid-template-columns:1fr; } }
+  .fade{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+  .fade.in{ opacity:1; transform:none; }
+ 
   footer{ border-top:1px solid var(--line); padding:30px 0 44px; font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); text-align:center; }
 </style>
 </head>
 <body>
-
+ 
 <section class="intro">
   <div class="wrap">
     <div class="eyebrow">TinyByk &middot; scroll sequence</div>
@@ -52,10 +77,20 @@
     <p>A live render from your Keyshot animation, with a transparent background so it sits directly on the page. Frames load progressively — nearest to your scroll position first.</p>
   </div>
 </section>
-
+ 
 <section class="stage" id="stage">
   <div class="sticky">
     <canvas id="seq"></canvas>
+ 
+    <div class="overlay">
+      <!-- EDIT: each line rises into place once scroll passes its data-from point (0–1). They stay, accumulating. -->
+      <div class="tagline-zone">
+        <div class="tagline" data-from="0.16">All-metal frame</div>
+        <div class="tagline" data-from="0.40">120&thinsp;kg rider limit</div>
+        <div class="tagline" data-from="0.64">The <em>smallest</em> bike ever made</div>
+      </div>
+    </div>
+ 
     <div class="tag-tl">TinyByk exploded animation</div>
     <div class="cue" id="cue"><span class="ln"></span>Scroll</div>
     <div class="dock">
@@ -67,9 +102,39 @@
     </div>
   </div>
 </section>
-
+ 
+<!-- ===== normal scrolling content continues below the animation ===== -->
+<section class="content">
+  <div class="wrap">
+    <div class="eyebrow fade">Why it exists</div>
+    <h2 class="fade">A real vehicle, <em>not a toy.</em></h2>
+    <p class="fade">TinyByk packs a full-size ride into the smallest footprint we could engineer — without the wobble, flex, or cut corners that make small rideables feel cheap. Every joint is load-rated, every interface is toleranced, and the whole thing folds down to something you can carry.</p>
+  </div>
+</section>
+ 
+<section class="content">
+  <div class="wrap">
+    <div class="eyebrow fade">The numbers</div>
+    <h2 class="fade">Built to spec, <em>not to a price point.</em></h2>
+    <div class="specs">
+      <div class="spec fade"><div class="k">Rider limit</div><div class="val">120 kg</div></div>
+      <div class="spec fade"><div class="k">Frame</div><div class="val">All metal</div></div>
+      <div class="spec fade"><div class="k">Folded size</div><div class="val">Carry-on</div></div>
+    </div>
+    <p class="fade" style="margin-top:2rem;">Placeholder figures — swap these for your real spec numbers once they're locked.</p>
+  </div>
+</section>
+ 
+<section class="content">
+  <div class="wrap">
+    <div class="eyebrow fade">Coming soon</div>
+    <h2 class="fade">Back it on <em>Kickstarter.</em></h2>
+    <p class="fade">Launching February 2027. This page is an early look — the full campaign, pricing, and reward tiers are on the way.</p>
+  </div>
+</section>
+ 
 <footer>Congruent Technologies &middot; TinyByk sequence</footer>
-
+ 
 <script>
 (function(){
   // ============================================================
@@ -82,26 +147,28 @@
     framePath: (i) => `Frames2PNG/ExplodedAnimationLANDINGPAGE1.50.${116+i}.png`,
     eager:          6,
     maxConcurrent:  4,
-    scrollSpan:     200,
-    reverse:        true   // scroll plays the sequence backwards
+    scrollSpan:     160,    // ← tuned: lower = faster scrub through the sequence
+    reverse:        true,   // scroll plays the sequence backwards
+    lerp:           1.9     // scroll responsiveness (multiplied by 0.075 internally)
   };
-
+ 
   const BG = '#FAFBFD';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+ 
   const canvas=document.getElementById('seq'), ctx=canvas.getContext('2d');
   const buf=document.getElementById('buf'), bctx=buf.getContext('2d');
   const stage=document.getElementById('stage'), cue=document.getElementById('cue');
   const fnum=document.getElementById('fnum'), bufpct=document.getElementById('bufpct');
+  const panels=[...document.querySelectorAll('.tagline')];
   const N=CONFIG.frameCount;
   document.getElementById('ftot').textContent=String(N).padStart(3,'0');
   document.getElementById('ftot2').textContent=String(N).padStart(3,'0');
   stage.style.height=CONFIG.scrollSpan+'vh';
-
+ 
   const status=new Array(N).fill(0);
   const images=new Array(N);
   let inFlight=0;
-
+ 
   let W=0,H=0,dpr=1;
   function resize(){
     dpr=Math.min(window.devicePixelRatio||1,2);
@@ -109,7 +176,10 @@
     canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
     buf.width=buf.clientWidth*dpr; buf.height=buf.clientHeight*dpr; bctx.setTransform(dpr,0,0,dpr,0,0);
   }
-
+ 
+  // ============================================================
+  // PROGRESSIVE LOADER
+  // ============================================================
   let cur=0, dir=1;
   function pickNext(){
     let best=-1, bestCost=Infinity;
@@ -136,7 +206,10 @@
       status[i]=1; inFlight++; loadOne(i);
     }
   }
-
+ 
+  // ============================================================
+  // DRAWING
+  // ============================================================
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   function nearestReady(i){
     if(status[i]===2) return i;
@@ -151,6 +224,7 @@
     ctx.fillStyle='rgba(110,155,203,.55)'; ctx.font='13px "IBM Plex Mono", monospace';
     ctx.textAlign='center'; ctx.fillText('LOADING…', W/2, H/2); ctx.textAlign='left';
   }
+  // CONTAIN-fit: scales the whole image to fit inside the canvas with no cropping.
   function containDraw(img){
     ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
     const ir=img.width/img.height, cr=W/H; let dw,dh;
@@ -177,7 +251,18 @@
     const cxp=clamp(cur/(N-1),0,1)*bw;
     bctx.fillStyle='#1A2230'; bctx.fillRect(cxp-1,0,2,bh);
   }
-
+ 
+  // taglines: rise into place once scroll passes data-from, then stay
+  function updatePanels(p){
+    panels.forEach(el=>{
+      const from=+el.dataset.from;
+      el.classList.toggle('show', p>=from);
+    });
+  }
+ 
+  // ============================================================
+  // SCROLL → FRAME loop
+  // ============================================================
   let target=0, lastCur=0, lastBuffered=-1;
   function progress(){
     const top=stage.getBoundingClientRect().top;
@@ -186,19 +271,22 @@
   }
   function loop(){
     const p=progress();
-    // reverse playback: scroll down counts frames backwards (N-1 → 0)
     target = CONFIG.reverse ? (1-p)*(N-1) : p*(N-1);
-    cur += (target-cur)*1.9; if(Math.abs(target-cur)<0.01) cur=target;
+    cur += (target-cur)*CONFIG.lerp*0.075; if(Math.abs(target-cur)<0.01) cur=target;
     dir = cur>=lastCur ? 1 : -1; lastCur=cur;
     pump();
     drawIndex(cur);
     drawBuf();
+    updatePanels(p);
     const buffered=status.filter(s=>s===2).length;
     if(buffered!==lastBuffered){ bufpct.textContent=String(buffered).padStart(3,'0'); lastBuffered=buffered; }
     if(p>0.02) cue.style.opacity=0; else cue.style.opacity=0.5;
     requestAnimationFrame(loop);
   }
-
+ 
+  // ============================================================
+  // BOOT
+  // ============================================================
   function start(){
     resize();
     if(reduce){
@@ -214,8 +302,19 @@
   }
   window.addEventListener('resize', resize);
   start();
+ 
+  // reveal the normal content sections below the animation as they scroll into view
+  const fades=[...document.querySelectorAll('.fade')];
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver((es)=>{
+      es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    },{ threshold:.18 });
+    fades.forEach(el=>io.observe(el));
+  } else {
+    fades.forEach(el=>el.classList.add('in'));
+  }
 })();
 </script>
-
+ 
 </body>
 </html>
