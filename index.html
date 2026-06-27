@@ -35,23 +35,31 @@
   .cue{ position:absolute; left:50%; transform:translateX(-50%); bottom:74px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); transition:opacity .4s ease; z-index:5; }
   .cue .ln{ width:1px; height:26px; background:linear-gradient(var(--blue-ln),transparent); }
  
-  /* ---------- stacked taglines: rise in and accumulate, bottom-left ---------- */
-  .overlay{ position:absolute; inset:0; z-index:4; pointer-events:none; }
-  .tagline-zone{ position:absolute; left:6%; right:auto; bottom:12%; display:flex; flex-direction:column; align-items:flex-start; gap:.5em; padding:0 12px 0 0; max-width:600px; }
+  /* ---------- taglines positioned relative to the IMAGE box, not the screen ----------
+     JS calculates the visible image area each frame and writes its size + position to
+     CSS custom properties on the overlay, so the taglines sit inside the bottom-left
+     of the bike render even when there's letterboxing on a wide screen. ---------- */
+  .overlay{
+    position:absolute;
+    /* defaults so something sensible renders even before JS runs */
+    --img-left:6%; --img-bottom:12%; --img-w:90%;
+    left:var(--img-left); bottom:var(--img-bottom); width:var(--img-w);
+    z-index:4; pointer-events:none;
+  }
+  .tagline-zone{ display:flex; flex-direction:column; align-items:flex-start; gap:.45em; max-width:62%; padding-left:4%; padding-bottom:4%; }
   .tagline{
-    font-family:var(--serif); font-weight:360; font-size:clamp(1.5rem,4.2vw,2.7rem); line-height:1.12; text-align:left;
+    font-family:var(--serif); font-weight:360; font-size:clamp(1.2rem,2.6vw,2.1rem); line-height:1.12; text-align:left;
     color:var(--ink); opacity:1; transform:translateY(40px); transition:transform 1.05s cubic-bezier(.16,.84,.22,1);
   }
   .tagline em{ font-style:italic; color:var(--blue-ln); }
   .tagline.show{ transform:translateY(0); }
-  @media (max-width:760px){ .tagline-zone{ left:7%; right:7%; bottom:16%; max-width:none; } }
+  @media (max-width:760px){ .tagline-zone{ max-width:90%; padding-left:6%; padding-bottom:6%; } }
  
   .dock{ position:absolute; left:28px; right:28px; bottom:22px; z-index:5; }
   .dockrow{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--slate); margin-bottom:8px; }
   .dockrow b{ color:var(--blue-ln); font-weight:500; }
   canvas#buf{ display:block; width:100%; height:6px; }
  
-  /* ---------- normal content sections below the animation ---------- */
   .content{ padding:clamp(4rem,9vw,7rem) 0; border-top:1px solid var(--line); }
   .content .eyebrow{ margin-bottom:1rem; }
   .content h2{ font-size:clamp(1.7rem,4vw,2.7rem); max-width:18ch; }
@@ -82,7 +90,7 @@
   <div class="sticky">
     <canvas id="seq"></canvas>
  
-    <div class="overlay">
+    <div class="overlay" id="overlay">
       <!-- EDIT: each line rises into place once scroll passes its data-from point (0–1). They stay, accumulating. -->
       <div class="tagline-zone">
         <div class="tagline" data-from="0.16">All-metal frame</div>
@@ -95,15 +103,14 @@
     <div class="cue" id="cue"><span class="ln"></span>Scroll</div>
     <div class="dock">
       <div class="dockrow">
-        <span>FRAME <b id="fnum">001</b> / <span id="ftot">046</span></span>
-        <span>LOADED <b id="bufpct">000</b> / <span id="ftot2">046</span></span>
+        <span>FRAME <b id="fnum">001</b> / <span id="ftot">048</span></span>
+        <span>LOADED <b id="bufpct">000</b> / <span id="ftot2">048</span></span>
       </div>
       <canvas id="buf"></canvas>
     </div>
   </div>
 </section>
  
-<!-- ===== normal scrolling content continues below the animation ===== -->
 <section class="content">
   <div class="wrap">
     <div class="eyebrow fade">Why it exists</div>
@@ -138,18 +145,19 @@
 <script>
 (function(){
   // ============================================================
-  // CONFIG — TinyByk PNG frames 116–161 (46 total), reversed playback
+  // CONFIG — TinyByk 1:1 square PNG frames 116–163 (48 total)
   // ============================================================
   const CONFIG = {
-    frameCount:     46,
+    frameCount:     48,
     useRealImages:  true,
     simulateLoading: false,
-    framePath: (i) => `Frames2PNG/ExplodedAnimationLANDINGPAGE1.50.${116+i}.png`,
+    framePath: (i) => `Frames3PNG/ExplodedAnimationLANDINGPAGE1.51.${116+i}.png`,
     eager:          6,
     maxConcurrent:  4,
-    scrollSpan:     160,    // ← tuned: lower = faster scrub through the sequence
-    reverse:        true,   // scroll plays the sequence backwards
-    lerp:           1.9     // scroll responsiveness (multiplied by 0.075 internally)
+    scrollSpan:     160,
+    reverse:        true,
+    lerp:           1.9,
+    imageAspect:    1   // 1:1 square — used to size the tagline zone to the visible image area
   };
  
   const BG = '#FAFBFD';
@@ -159,6 +167,7 @@
   const buf=document.getElementById('buf'), bctx=buf.getContext('2d');
   const stage=document.getElementById('stage'), cue=document.getElementById('cue');
   const fnum=document.getElementById('fnum'), bufpct=document.getElementById('bufpct');
+  const overlay=document.getElementById('overlay');
   const panels=[...document.querySelectorAll('.tagline')];
   const N=CONFIG.frameCount;
   document.getElementById('ftot').textContent=String(N).padStart(3,'0');
@@ -175,6 +184,20 @@
     W=canvas.clientWidth; H=canvas.clientHeight;
     canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
     buf.width=buf.clientWidth*dpr; buf.height=buf.clientHeight*dpr; bctx.setTransform(dpr,0,0,dpr,0,0);
+    positionOverlay();
+  }
+ 
+  // calculate where the contained image actually sits inside the canvas,
+  // then position the overlay to match its bottom-left corner and width.
+  function positionOverlay(){
+    const ar=CONFIG.imageAspect, cr=W/H;
+    let dw,dh;
+    if(ar>cr){ dw=W; dh=W/ar; } else { dh=H; dw=H*ar; }
+    const left=(W-dw)/2;
+    const bottom=(H-dh)/2;   // distance from canvas bottom to image bottom
+    overlay.style.setProperty('--img-left',  left+'px');
+    overlay.style.setProperty('--img-bottom',bottom+'px');
+    overlay.style.setProperty('--img-w',     dw+'px');
   }
  
   // ============================================================
@@ -224,11 +247,11 @@
     ctx.fillStyle='rgba(110,155,203,.55)'; ctx.font='13px "IBM Plex Mono", monospace';
     ctx.textAlign='center'; ctx.fillText('LOADING…', W/2, H/2); ctx.textAlign='left';
   }
-  // CONTAIN-fit: scales the whole image to fit inside the canvas with no cropping.
+  // CONTAIN-fit using the configured image aspect (works for square or any other)
   function containDraw(img){
     ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
-    const ir=img.width/img.height, cr=W/H; let dw,dh;
-    if(ir>cr){ dw=W; dh=W/ir; } else { dh=H; dw=H*ir; }
+    const ar=CONFIG.imageAspect, cr=W/H; let dw,dh;
+    if(ar>cr){ dw=W; dh=W/ar; } else { dh=H; dw=H*ar; }
     ctx.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh);
   }
   function drawIndex(i){
@@ -252,7 +275,6 @@
     bctx.fillStyle='#1A2230'; bctx.fillRect(cxp-1,0,2,bh);
   }
  
-  // taglines: rise into place once scroll passes data-from, then stay
   function updatePanels(p){
     panels.forEach(el=>{
       const from=+el.dataset.from;
@@ -284,9 +306,6 @@
     requestAnimationFrame(loop);
   }
  
-  // ============================================================
-  // BOOT
-  // ============================================================
   function start(){
     resize();
     if(reduce){
@@ -303,7 +322,7 @@
   window.addEventListener('resize', resize);
   start();
  
-  // reveal the normal content sections below the animation as they scroll into view
+  // content fade-ins
   const fades=[...document.querySelectorAll('.fade')];
   if('IntersectionObserver' in window){
     const io=new IntersectionObserver((es)=>{
