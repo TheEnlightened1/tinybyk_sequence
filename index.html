@@ -149,13 +149,13 @@
   // CONFIG — TinyByk 1:1 square PNG frames 116–163 (48 total)
   // ============================================================
   const CONFIG = {
-    frameCount:     39,
+    frameCount:     31,
     useRealImages:  true,
     simulateLoading: false,
-    framePath: (i) => `webp_output/ExplodedAnimationLANDINGPAGE1.62.${112+i}.webp`,
-    eager:          6,
-    maxConcurrent:  4,
-    scrollSpan:     110,
+    framePath: (i) => `webp_output2/ExplodedAnimationLANDINGPAGE1.63.${118+i}.webp`,
+    eager:          31,    // load ALL frames upfront — the whole set is tiny now
+    maxConcurrent:  8,     // more parallel fetches
+    scrollSpan:     160,
     reverse:        true,
     lerp:           1.9,
     imageAspect:    1280/2048   // portrait — used to size the tagline zone to the visible image area
@@ -164,7 +164,7 @@
   const BG = '#FAFBFD';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const canvas=document.getElementById('seq'), ctx=canvas.getContext('2d');
+  const canvas=document.getElementById('seq'), ctx=canvas.getContext('2d',{ alpha:true, desynchronized:true });
   const stage=document.getElementById('stage'), cue=document.getElementById('cue');
   const overlay=document.getElementById('overlay');
   const driftwrap=document.getElementById('driftwrap');
@@ -182,6 +182,7 @@
     W=canvas.clientWidth; H=canvas.clientHeight;
     canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
     positionOverlay();
+    lastDrawn=-1;   // canvas was cleared by the resize — force the next draw
   }
 
   // calculate where the contained image actually sits inside the canvas,
@@ -200,7 +201,7 @@
   // ============================================================
   // PROGRESSIVE LOADER
   // ============================================================
-  let cur=0, dir=1;
+  let cur=0, dir=1, lastDrawn=-1;
   function pickNext(){
     let best=-1, bestCost=Infinity;
     for(let i=0;i<N;i++){
@@ -214,11 +215,20 @@
     return best;
   }
   function loadOne(i){
-    const done=ok=>{ status[i]=ok?2:3; inFlight--; pump(); };
-    const im=new Image();
-    im.onload=()=>{ images[i]=im; done(true); };
-    im.onerror=()=>done(false);
-    im.src=CONFIG.framePath(i);
+    const done=ok=>{ status[i]=ok?2:3; inFlight--; lastDrawn=-1; pump(); };
+    const url=CONFIG.framePath(i);
+    // createImageBitmap decodes off the main thread → far smoother canvas draws on mobile
+    if(window.createImageBitmap){
+      fetch(url).then(r=>{ if(!r.ok) throw 0; return r.blob(); })
+        .then(b=>createImageBitmap(b))
+        .then(bm=>{ images[i]=bm; done(true); })
+        .catch(()=>done(false));
+    } else {
+      const im=new Image();
+      im.onload=()=>{ images[i]=im; done(true); };
+      im.onerror=()=>done(false);
+      im.src=url;
+    }
   }
   function pump(){
     while(inFlight<CONFIG.maxConcurrent){
@@ -254,8 +264,10 @@
   function drawIndex(i){
     i=clamp(Math.round(i),0,N-1);
     const j=nearestReady(i);
-    if(j<0){ drawWaiting(); }
-    else { if(images[j]) containDraw(images[j]); else drawWaiting(); }
+    if(j<0){ drawWaiting(); lastDrawn=-1; return; }
+    if(j===lastDrawn) return;            // already showing this frame — skip the redraw
+    if(images[j]){ containDraw(images[j]); lastDrawn=j; }
+    else { drawWaiting(); lastDrawn=-1; }
   }
 
   // Each tagline travels up from below into its resting spot; a box draws around them.
