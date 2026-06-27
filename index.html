@@ -7,13 +7,13 @@
  
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Hanken+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
  
 <style>
   :root{
     --paper:#FAFBFD; --ink:#1A2230; --slate:#586071; --mute:#8A94A3;
     --blue:#8FB7E2; --blue-ln:#6E9BCB; --line:#E7ECF3; --dark:#15191F; --dark-ink:#EDF1F7;
-    --serif:"Fraunces",Georgia,serif; --sans:"Hanken Grotesk",system-ui,sans-serif; --mono:"IBM Plex Mono",monospace;
+    --serif:"Space Grotesk",system-ui,sans-serif; --sans:"Hanken Grotesk",system-ui,sans-serif; --mono:"IBM Plex Mono",monospace;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased; }
@@ -35,29 +35,34 @@
   .cue{ position:absolute; left:50%; transform:translateX(-50%); bottom:74px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); transition:opacity .4s ease; z-index:5; }
   .cue .ln{ width:1px; height:26px; background:linear-gradient(var(--blue-ln),transparent); }
  
-  /* ---------- taglines positioned relative to the IMAGE box, not the screen ----------
-     JS calculates the visible image area each frame and writes its size + position to
-     CSS custom properties on the overlay, so the taglines sit inside the bottom-left
-     of the bike render even when there's letterboxing on a wide screen. ---------- */
+  /* ---------- taglines positioned relative to the IMAGE box, not the screen ---------- */
   .overlay{
     position:absolute;
-    /* defaults so something sensible renders even before JS runs */
     --img-left:6%; --img-bottom:12%; --img-w:90%;
     left:var(--img-left); bottom:var(--img-bottom); width:var(--img-w);
     z-index:4; pointer-events:none;
   }
-  .tagline-zone{ display:flex; flex-direction:column; align-items:flex-start; gap:.45em; max-width:62%; padding-left:4%; padding-bottom:4%; }
+  .tagline-zone{
+    position:relative; display:inline-flex; flex-direction:column; align-items:flex-start; gap:.5em;
+    margin-left:4%; margin-bottom:4%; padding:1.1em 1.4em;
+  }
+  /* the box: four borders that draw in as the lines arrive, completing on settle */
+  .bx{ position:absolute; background:var(--ink); }
+  .bx.t{ top:0; left:0; height:1.5px; width:0; }
+  .bx.r{ top:0; right:0; width:1.5px; height:0; }
+  .bx.b{ bottom:0; right:0; height:1.5px; width:0; }
+  .bx.l{ bottom:0; left:0; width:1.5px; height:0; }
+ 
   .tagline{
-    font-family:var(--serif); font-weight:360; font-size:clamp(1.4rem,3.2vw,2.6rem); line-height:1.12; text-align:left;
+    font-family:var(--sans); font-weight:500; font-size:clamp(1.15rem,2.6vw,1.9rem); line-height:1.15; letter-spacing:-.01em; text-align:left;
     color:var(--ink); will-change:transform; opacity:0;
   }
-  .tagline em{ font-style:italic; color:var(--blue-ln); }
-  @media (max-width:760px){ .tagline-zone{ max-width:90%; padding-left:6%; padding-bottom:6%; } }
+  .tagline em{ font-style:normal; color:var(--blue-ln); }
+  @media (max-width:760px){ .tagline-zone{ margin-left:6%; margin-bottom:6%; } }
  
   .dock{ position:absolute; left:28px; right:28px; bottom:22px; z-index:5; }
   .dockrow{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--slate); margin-bottom:8px; }
   .dockrow b{ color:var(--blue-ln); font-weight:500; }
-  canvas#buf{ display:block; width:100%; height:6px; }
  
   .content{ padding:clamp(4rem,9vw,7rem) 0; border-top:1px solid var(--line); }
   .content .eyebrow{ margin-bottom:1rem; }
@@ -92,6 +97,7 @@
     <div class="overlay" id="overlay">
       <!-- EDIT: each line rises into place once scroll passes its data-from point (0–1). They stay, accumulating. -->
       <div class="tagline-zone">
+        <span class="bx t"></span><span class="bx r"></span><span class="bx b"></span><span class="bx l"></span>
         <div class="tagline" data-from="0.06" data-to="0.34">40 parts</div>
         <div class="tagline" data-from="0.30" data-to="0.58">All-metal frame</div>
         <div class="tagline" data-from="0.54" data-to="0.82">130&thinsp;kg weight limit</div>
@@ -100,13 +106,6 @@
  
     <div class="tag-tl">TinyByk exploded animation</div>
     <div class="cue" id="cue"><span class="ln"></span>Scroll</div>
-    <div class="dock">
-      <div class="dockrow">
-        <span>FRAME <b id="fnum">001</b> / <span id="ftot">039</span></span>
-        <span>LOADED <b id="bufpct">000</b> / <span id="ftot2">039</span></span>
-      </div>
-      <canvas id="buf"></canvas>
-    </div>
   </div>
 </section>
  
@@ -150,7 +149,7 @@
     frameCount:     39,
     useRealImages:  true,
     simulateLoading: false,
-    framePath: (i) => `Frames5PNG/ExplodedAnimationLANDINGPAGE1.61.${112+i}.png`,
+    framePath: (i) => `Frames6PNG/ExplodedAnimationLANDINGPAGE1.62.${112+i}.png`,
     eager:          6,
     maxConcurrent:  4,
     scrollSpan:     160,
@@ -163,14 +162,10 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
  
   const canvas=document.getElementById('seq'), ctx=canvas.getContext('2d');
-  const buf=document.getElementById('buf'), bctx=buf.getContext('2d');
   const stage=document.getElementById('stage'), cue=document.getElementById('cue');
-  const fnum=document.getElementById('fnum'), bufpct=document.getElementById('bufpct');
   const overlay=document.getElementById('overlay');
   const panels=[...document.querySelectorAll('.tagline')];
   const N=CONFIG.frameCount;
-  document.getElementById('ftot').textContent=String(N).padStart(3,'0');
-  document.getElementById('ftot2').textContent=String(N).padStart(3,'0');
   stage.style.height=CONFIG.scrollSpan+'vh';
  
   const status=new Array(N).fill(0);
@@ -182,7 +177,6 @@
     dpr=Math.min(window.devicePixelRatio||1,2);
     W=canvas.clientWidth; H=canvas.clientHeight;
     canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
-    buf.width=buf.clientWidth*dpr; buf.height=buf.clientHeight*dpr; bctx.setTransform(dpr,0,0,dpr,0,0);
     positionOverlay();
   }
  
@@ -258,40 +252,36 @@
     const j=nearestReady(i);
     if(j<0){ drawWaiting(); }
     else { if(images[j]) containDraw(images[j]); else drawWaiting(); }
-    fnum.textContent=String(i+1).padStart(3,'0');
-  }
-  function drawBuf(){
-    const bw=buf.clientWidth, bh=buf.clientHeight; bctx.clearRect(0,0,bw,bh);
-    const seg=bw/N;
-    for(let i=0;i<N;i++){
-      bctx.fillStyle = status[i]===2 ? 'rgba(110,155,203,.9)'
-                     : status[i]===1 ? 'rgba(110,155,203,.4)'
-                     : status[i]===3 ? 'rgba(214,120,120,.5)'
-                     : 'rgba(26,34,48,.1)';
-      bctx.fillRect(i*seg,0,Math.max(1,seg-1),bh);
-    }
-    const cxp=clamp(cur/(N-1),0,1)*bw;
-    bctx.fillStyle='#1A2230'; bctx.fillRect(cxp-1,0,2,bh);
   }
  
-  // Each tagline travels up from below the screen into its resting spot as you scroll.
-  // travel = how far below the resting position it starts (in px). 0 progress = fully below.
+  // Each tagline travels up from below into its resting spot; a box draws around them.
+  const box={ t:document.querySelector('.bx.t'), r:document.querySelector('.bx.r'),
+              b:document.querySelector('.bx.b'), l:document.querySelector('.bx.l') };
+  const boxStart=0.06, boxEnd=0.82;   // matches first data-from … last data-to
   function updatePanels(p){
     const travel = Math.max(window.innerHeight*0.55, 360);
     panels.forEach(el=>{
       const from=+el.dataset.from, to=+el.dataset.to;
-      let t = (p-from)/(to-from);          // 0 before it enters, 1 when settled
-      t = clamp(t,0,1);
-      const ease = 1-Math.pow(1-t,3);      // ease-out
+      let t = clamp((p-from)/(to-from),0,1);
+      const ease = 1-Math.pow(1-t,3);
       el.style.transform = `translateY(${(1-ease)*travel}px)`;
-      el.style.opacity = t<=0 ? 0 : 1;     // hidden until it starts entering
+      el.style.opacity = t<=0 ? 0 : 1;
     });
+    // box: draws clockwise (top → right → bottom → left) across the whole span
+    let bp = clamp((p-boxStart)/(boxEnd-boxStart),0,1);
+    const seg = q => clamp((bp-q*0.25)/0.25,0,1)*100;   // each side fills over a quarter
+    if(box.t){
+      box.t.style.width  = seg(0)+'%';
+      box.r.style.height = seg(1)+'%';
+      box.b.style.width  = seg(2)+'%';
+      box.l.style.height = seg(3)+'%';
+    }
   }
  
   // ============================================================
   // SCROLL → FRAME loop
   // ============================================================
-  let target=0, lastCur=0, lastBuffered=-1;
+  let target=0, lastCur=0;
   function progress(){
     const top=stage.getBoundingClientRect().top;
     const total=stage.offsetHeight-window.innerHeight;
@@ -304,10 +294,7 @@
     dir = cur>=lastCur ? 1 : -1; lastCur=cur;
     pump();
     drawIndex(cur);
-    drawBuf();
     updatePanels(p);
-    const buffered=status.filter(s=>s===2).length;
-    if(buffered!==lastBuffered){ bufpct.textContent=String(buffered).padStart(3,'0'); lastBuffered=buffered; }
     if(p>0.02) cue.style.opacity=0; else cue.style.opacity=0.5;
     requestAnimationFrame(loop);
   }
@@ -318,7 +305,7 @@
       const mid=Math.floor(N/2);
       status[mid]=1; inFlight++;
       loadOne(mid);
-      const iv=setInterval(()=>{ drawIndex(mid); drawBuf();
+      const iv=setInterval(()=>{ drawIndex(mid);
         if(status[mid]===2||status[mid]===3){ clearInterval(iv); } },120);
       return;
     }
@@ -343,3 +330,4 @@
  
 </body>
 </html>
+ 
