@@ -49,10 +49,10 @@
   .tagline-zone{ display:flex; flex-direction:column; align-items:flex-start; gap:.45em; max-width:62%; padding-left:4%; padding-bottom:4%; }
   .tagline{
     font-family:var(--serif); font-weight:360; font-size:clamp(1.2rem,2.6vw,2.1rem); line-height:1.12; text-align:left;
-    color:var(--ink); opacity:1; transform:translateY(40px); transition:transform 1.05s cubic-bezier(.16,.84,.22,1);
+    color:var(--ink); opacity:0; transform:translateY(40px); transition:opacity 1s ease, transform 1.05s cubic-bezier(.16,.84,.22,1);
   }
   .tagline em{ font-style:italic; color:var(--blue-ln); }
-  .tagline.show{ transform:translateY(0); }
+  .tagline.show{ opacity:1; transform:translateY(0); }
   @media (max-width:760px){ .tagline-zone{ max-width:90%; padding-left:6%; padding-bottom:6%; } }
  
   .dock{ position:absolute; left:28px; right:28px; bottom:22px; z-index:5; }
@@ -93,9 +93,9 @@
     <div class="overlay" id="overlay">
       <!-- EDIT: each line rises into place once scroll passes its data-from point (0–1). They stay, accumulating. -->
       <div class="tagline-zone">
-        <div class="tagline" data-from="0.16">All-metal frame</div>
-        <div class="tagline" data-from="0.40">120&thinsp;kg rider limit</div>
-        <div class="tagline" data-from="0.64">The <em>smallest</em> bike ever made</div>
+        <div class="tagline" data-from="0.16">40 parts</div>
+        <div class="tagline" data-from="0.40">All-metal frame</div>
+        <div class="tagline" data-from="0.64">130&thinsp;kg weight limit</div>
       </div>
     </div>
  
@@ -151,13 +151,13 @@
     frameCount:     48,
     useRealImages:  true,
     simulateLoading: false,
-    framePath: (i) => `Frames3PNG/ExplodedAnimationLANDINGPAGE1.51.${116+i}.png`,
+    framePath: (i) => `Frames4PNG/ExplodedAnimationLANDINGPAGE1.52.${116+i}.png`,
     eager:          6,
     maxConcurrent:  4,
     scrollSpan:     160,
     reverse:        true,
     lerp:           1.9,
-    imageAspect:    1   // 1:1 square — used to size the tagline zone to the visible image area
+    imageAspect:    1024/1820   // portrait — used to size the tagline zone to the visible image area
   };
  
   const BG = '#FAFBFD';
