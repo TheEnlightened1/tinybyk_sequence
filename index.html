@@ -49,10 +49,9 @@
   .tagline-zone{ display:flex; flex-direction:column; align-items:flex-start; gap:.45em; max-width:62%; padding-left:4%; padding-bottom:4%; }
   .tagline{
     font-family:var(--serif); font-weight:360; font-size:clamp(1.4rem,3.2vw,2.6rem); line-height:1.12; text-align:left;
-    color:var(--ink); opacity:1; transform:translateY(40px); transition:transform 1.05s cubic-bezier(.16,.84,.22,1);
+    color:var(--ink); will-change:transform; opacity:0;
   }
   .tagline em{ font-style:italic; color:var(--blue-ln); }
-  .tagline.show{ transform:translateY(0); }
   @media (max-width:760px){ .tagline-zone{ max-width:90%; padding-left:6%; padding-bottom:6%; } }
  
   .dock{ position:absolute; left:28px; right:28px; bottom:22px; z-index:5; }
@@ -93,9 +92,9 @@
     <div class="overlay" id="overlay">
       <!-- EDIT: each line rises into place once scroll passes its data-from point (0–1). They stay, accumulating. -->
       <div class="tagline-zone">
-        <div class="tagline" data-from="0.02">40 parts</div>
-        <div class="tagline" data-from="0.28">All-metal frame</div>
-        <div class="tagline" data-from="0.54">130&thinsp;kg weight limit</div>
+        <div class="tagline" data-from="0.06" data-to="0.34">40 parts</div>
+        <div class="tagline" data-from="0.30" data-to="0.58">All-metal frame</div>
+        <div class="tagline" data-from="0.54" data-to="0.82">130&thinsp;kg weight limit</div>
       </div>
     </div>
  
@@ -275,10 +274,17 @@
     bctx.fillStyle='#1A2230'; bctx.fillRect(cxp-1,0,2,bh);
   }
  
+  // Each tagline travels up from below the screen into its resting spot as you scroll.
+  // travel = how far below the resting position it starts (in px). 0 progress = fully below.
   function updatePanels(p){
+    const travel = Math.max(window.innerHeight*0.55, 360);
     panels.forEach(el=>{
-      const from=+el.dataset.from;
-      el.classList.toggle('show', p>=from);
+      const from=+el.dataset.from, to=+el.dataset.to;
+      let t = (p-from)/(to-from);          // 0 before it enters, 1 when settled
+      t = clamp(t,0,1);
+      const ease = 1-Math.pow(1-t,3);      // ease-out
+      el.style.transform = `translateY(${(1-ease)*travel}px)`;
+      el.style.opacity = t<=0 ? 0 : 1;     // hidden until it starts entering
     });
   }
  
