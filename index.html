@@ -3,190 +3,413 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TinyByk — scroll sequence</title>
+<title>TinyByk — the smallest bike ever made</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
+  /* ============================================================
+     TinyByk — "Blueprint" style
+     Palette: drafting paper + the logo's true ink blue (#004aad),
+     with the logo yellow reserved as a single rare accent.
+     ============================================================ */
   :root{
-    --paper:#FAFBFD; --ink:#1A2230; --slate:#586071; --mute:#8A94A3;
-    --blue:#8FB7E2; --blue-ln:#6E9BCB; --line:#E7ECF3; --dark:#15191F; --dark-ink:#EDF1F7;
-    --serif:"Space Grotesk",system-ui,sans-serif; --sans:"Hanken Grotesk",system-ui,sans-serif; --mono:"IBM Plex Mono",monospace;
+    --paper:#F4F6FA;        /* cool drafting paper */
+    --paper-2:#EAEEF6;      /* panel tint */
+    --ink:#0A1A33;          /* near-black blue, primary text */
+    --blue:#004aad;         /* TRUE logo blue — primary accent */
+    --blue-soft:#3D6FC4;    /* lighter blue for secondary marks */
+    --yellow:#FFDE59;       /* logo yellow — rare accent only */
+    --line:#CBD6E8;         /* blueprint hairlines */
+    --mute:#6B7A93;         /* captions */
+    --disp:"Space Grotesk",system-ui,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
-  body{ background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased; }
-  .wrap{ max-width:1080px; margin:0 auto; padding:0 32px; }
-  h1,h2{ font-family:var(--serif); font-weight:340; letter-spacing:-.015em; }
-  .eyebrow{ font-family:var(--mono); font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color:var(--blue-ln); }
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--paper); color:var(--ink); font-family:var(--disp); line-height:1.6; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
 
-  .intro{ padding:clamp(5rem,12vw,9rem) 0 clamp(2rem,5vw,3rem); }
-  .intro .eyebrow{ margin-bottom:1.4rem; }
-  .intro h1{ font-size:clamp(2.2rem,5.5vw,3.8rem); line-height:1.05; max-width:17ch; }
-  .intro h1 em{ font-style:italic; color:var(--blue-ln); }
-  .intro p{ margin-top:1.4rem; max-width:50ch; color:var(--slate); }
+  /* faint blueprint grid on the page background */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:46px 46px; opacity:.16;
+  }
+  main,header,footer{ position:relative; z-index:1; }
+
+  /* ---------------- header ---------------- */
+  header{ position:sticky; top:0; z-index:50; background:rgba(244,246,250,.82); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .bar{ display:flex; align-items:center; justify-content:space-between; padding:14px 28px; max-width:1180px; margin:0 auto; }
+  .brand{ display:flex; align-items:center; gap:0; }
+  .brand img{ height:34px; width:auto; display:block; }
+  .nav{ display:flex; align-items:center; gap:28px; }
+  .nav a{ font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); text-decoration:none; transition:color .2s; }
+  .nav a:hover{ color:var(--blue); }
+  .nav .reserve{ color:var(--paper); background:var(--blue); padding:.55rem 1rem; letter-spacing:.1em; }
+  .nav .reserve:hover{ background:var(--ink); color:var(--paper); }
+  @media (max-width:680px){ .nav a:not(.reserve){ display:none; } }
+
+  /* ---------------- hero ---------------- */
+  .hero{ padding:clamp(3rem,7vw,5.5rem) 0 clamp(2rem,4vw,3rem); }
+  .hero .kicker{ font-family:var(--mono); font-size:.74rem; letter-spacing:.22em; text-transform:uppercase; color:var(--blue); display:flex; align-items:center; gap:.7rem; margin-bottom:1.4rem; }
+  .hero .kicker::before{ content:""; width:34px; height:1px; background:var(--blue); }
+  .hero h1{ font-weight:600; font-size:clamp(2.4rem,6.4vw,4.6rem); line-height:1.02; letter-spacing:-.02em; max-width:15ch; }
+  .hero h1 .y{ color:var(--blue); }
+  .hero .sub{ margin-top:1.5rem; max-width:46ch; color:var(--mute); font-size:1.08rem; }
+
+  /* dimension stat row — reads like a spec callout, not a generic stat band */
+  .dims{ display:flex; flex-wrap:wrap; gap:0; margin-top:2.6rem; border:1px solid var(--line); width:fit-content; max-width:100%; }
+  .dim{ padding:1rem 1.6rem; border-right:1px solid var(--line); }
+  .dim:last-child{ border-right:0; }
+  .dim .k{ font-family:var(--mono); font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+  .dim .v{ font-family:var(--mono); font-weight:600; font-size:1.5rem; color:var(--ink); margin-top:.2rem; }
+  @media (max-width:560px){ .dim{ flex:1 1 40%; border-bottom:1px solid var(--line); } }
+
+  /* ---------------- hero video placeholder ---------------- */
+  .reel{ margin-top:clamp(2.5rem,5vw,3.5rem); }
+  .reel-frame{
+    position:relative; aspect-ratio:16/9; width:100%; background:var(--paper-2);
+    border:1px solid var(--line); overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  /* corner ticks — drafting registration marks */
+  .reel-frame .tick{ position:absolute; width:14px; height:14px; border:1.5px solid var(--blue); }
+  .reel-frame .tick.tl{ top:10px; left:10px; border-right:0; border-bottom:0; }
+  .reel-frame .tick.tr{ top:10px; right:10px; border-left:0; border-bottom:0; }
+  .reel-frame .tick.bl{ bottom:10px; left:10px; border-right:0; border-top:0; }
+  .reel-frame .tick.br{ bottom:10px; right:10px; border-left:0; border-top:0; }
+  .reel-ph{ text-align:center; padding:2rem; }
+  .reel-ph .play{ width:64px; height:64px; border:1.5px solid var(--blue); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.1rem; }
+  .reel-ph .play::after{ content:""; border-left:16px solid var(--blue); border-top:10px solid transparent; border-bottom:10px solid transparent; margin-left:4px; }
+  .reel-ph .lbl{ font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--mute); }
+  .reel-cap{ margin-top:.8rem; font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; color:var(--mute); display:flex; justify-content:space-between; }
+
+  /* ====== to drop in your real video later, replace the .reel-ph block with:
+     <video autoplay muted loop playsinline poster="poster.jpg">
+       <source src="hero.webm" type="video/webm">
+       <source src="hero.mp4"  type="video/mp4">
+     </video>
+     and add: .reel-frame video{ width:100%; height:100%; object-fit:cover; display:block; }
+  ====== */
+
+  /* ---------------- sequence stage (engine unchanged) ---------------- */
+  .seqsection{ padding-top:clamp(2rem,4vw,3rem); }
+  .seqsection .eyebrow{ font-family:var(--mono); font-size:.74rem; letter-spacing:.2em; text-transform:uppercase; color:var(--blue); margin-bottom:.8rem; }
+  .seqsection h2{ font-weight:600; font-size:clamp(1.6rem,3.6vw,2.4rem); letter-spacing:-.01em; max-width:20ch; }
+  .seqsection .note{ margin-top:.8rem; color:var(--mute); max-width:48ch; }
 
   .stage{ height:340vh; position:relative; }
-  .sticky{ position:sticky; top:0; height:100vh; overflow:hidden; background:var(--paper); }
+  .sticky{ position:sticky; top:0; height:100vh; overflow:hidden; }
   .driftwrap{ position:absolute; inset:0; will-change:transform; }
   canvas#seq{ display:block; width:100%; height:100%; }
 
-  .tag-tl{ position:absolute; left:28px; top:24px; font-family:var(--mono); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); z-index:5; }
-  .cue{ position:absolute; left:50%; transform:translateX(-50%); bottom:74px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); transition:opacity .4s ease; z-index:5; }
-  .cue .ln{ width:1px; height:26px; background:linear-gradient(var(--blue-ln),transparent); }
+  .tag-tl{ position:absolute; left:24px; top:20px; font-family:var(--mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); z-index:5; }
+  .cue{ position:absolute; left:50%; transform:translateX(-50%); bottom:34px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--mono); font-size:.62rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); transition:opacity .4s ease; z-index:5; }
+  .cue .ln{ width:1px; height:26px; background:linear-gradient(var(--blue),transparent); }
 
-  /* ---------- taglines positioned relative to the IMAGE box, not the screen ---------- */
-  .overlay{
-    position:absolute;
-    --img-left:6%; --img-bottom:12%; --img-w:90%;
-    left:var(--img-left); bottom:var(--img-bottom); width:var(--img-w);
-    z-index:4; pointer-events:none;
-  }
-  .tagline-zone{
-    position:relative; display:inline-flex; flex-direction:column; align-items:flex-start; gap:.5em;
-    margin-left:4%; margin-bottom:4%; padding:1.1em 1.4em;
-  }
-  /* the box: four borders that draw in as the lines arrive, completing on settle */
-  .bx{ position:absolute; background:var(--ink); }
+  /* taglines anchored to the image's lower-left, box draws around them */
+  .overlay{ position:absolute; --img-left:6%; --img-bottom:12%; --img-w:90%;
+            left:var(--img-left); bottom:var(--img-bottom); width:var(--img-w); z-index:4; pointer-events:none; }
+  .tagline-zone{ position:relative; display:inline-flex; flex-direction:column; align-items:flex-start; gap:.5em; margin-left:4%; margin-bottom:-2%; padding:1.1em 1.4em; }
+  .bx{ position:absolute; background:var(--blue); }
   .bx.t{ top:0; left:0; height:1.5px; width:0; }
   .bx.r{ top:0; right:0; width:1.5px; height:0; }
   .bx.b{ bottom:0; right:0; height:1.5px; width:0; }
   .bx.l{ bottom:0; left:0; width:1.5px; height:0; }
+  .tagline{ font-family:var(--disp); font-weight:600; font-size:clamp(1.4rem,3.2vw,2.4rem); line-height:1.12; letter-spacing:-.01em; color:var(--ink); will-change:transform; opacity:0; }
+  .tagline .u{ color:var(--blue); }
+  @media (max-width:760px){ .tagline-zone{ margin-left:6%; margin-bottom:4%; } }
 
-  .tagline{
-    font-family:var(--sans); font-weight:500; font-size:clamp(1.15rem,2.6vw,1.9rem); line-height:1.15; letter-spacing:-.01em; text-align:left;
-    color:var(--ink); will-change:transform; opacity:0;
+  /* ---------------- what's in the box (swipe carousel) ---------------- */
+  .box-sec{ padding:clamp(4rem,9vw,7rem) 0; border-top:1px solid var(--line); }
+  .box-sec .eyebrow{ font-family:var(--mono); font-size:.74rem; letter-spacing:.2em; text-transform:uppercase; color:var(--blue); margin-bottom:1rem; }
+  .box-sec h2{ font-weight:600; font-size:clamp(1.8rem,4vw,2.7rem); letter-spacing:-.01em; max-width:20ch; }
+  .box-sec .note{ margin-top:1rem; max-width:52ch; color:var(--mute); }
+  .box-sec .swipehint{ font-family:var(--mono); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); margin-top:1.4rem; display:flex; align-items:center; gap:.5rem; }
+  .box-sec .swipehint span{ font-size:1rem; }
+
+  .carousel{ position:relative; margin-top:2.4rem; }
+  .track{
+    display:flex; gap:18px; overflow-x:auto; scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch; scroll-behavior:smooth; padding-bottom:14px;
+    scrollbar-width:none;
   }
-  .tagline em{ font-style:normal; color:var(--blue-ln); }
-  @media (max-width:760px){ .tagline-zone{ margin-left:6%; margin-bottom:6%; } }
+  .track::-webkit-scrollbar{ display:none; }
+  .slide{ scroll-snap-align:center; flex:0 0 88%; max-width:880px; }
+  @media (min-width:760px){ .slide{ flex-basis:72%; } }
 
-  .dock{ position:absolute; left:28px; right:28px; bottom:22px; z-index:5; }
-  .dockrow{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--slate); margin-bottom:8px; }
-  .dockrow b{ color:var(--blue-ln); font-weight:500; }
+  .slide-frame{
+    position:relative; aspect-ratio:4/3; background:var(--paper-2); border:1px solid var(--line);
+    overflow:hidden; display:flex; align-items:center; justify-content:center;
+  }
+  .slide-frame .tick{ position:absolute; width:13px; height:13px; border:1.5px solid var(--blue); }
+  .slide-frame .tick.tl{ top:9px; left:9px; border-right:0; border-bottom:0; }
+  .slide-frame .tick.tr{ top:9px; right:9px; border-left:0; border-bottom:0; }
+  .slide-frame .tick.bl{ bottom:9px; left:9px; border-right:0; border-top:0; }
+  .slide-frame .tick.br{ bottom:9px; right:9px; border-left:0; border-top:0; }
+  .slide-ph{ text-align:center; padding:1.5rem; }
+  .slide-ph .ic{ width:46px; height:46px; border:1.5px solid var(--blue-soft); border-radius:50%; margin:0 auto .9rem; display:flex; align-items:center; justify-content:center; color:var(--blue); font-family:var(--mono); font-size:.8rem; }
+  .slide-ph .ph-lbl{ font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+  /* video slide gets a play glyph instead */
+  .slide-ph.video .ic::after{ content:""; border-left:12px solid var(--blue); border-top:7px solid transparent; border-bottom:7px solid transparent; margin-left:3px; }
 
-  .content{ padding:clamp(4rem,9vw,7rem) 0; border-top:1px solid var(--line); }
-  .content .eyebrow{ margin-bottom:1rem; }
-  .content h2{ font-size:clamp(1.7rem,4vw,2.7rem); max-width:18ch; }
-  .content h2 em{ font-style:italic; color:var(--blue-ln); }
-  .content p{ margin-top:1.2rem; max-width:54ch; color:var(--slate); }
-  .content .specs{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:2.4rem; }
-  .content .spec{ background:var(--paper); padding:1.6rem 1.4rem; }
-  .content .spec .k{ font-family:var(--mono); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--mute); }
-  .content .spec .val{ font-family:var(--serif); font-style:italic; font-size:clamp(1.5rem,3vw,2.1rem); margin-top:.5rem; }
-  @media (max-width:680px){ .content .specs{ grid-template-columns:1fr; } }
-  .fade{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+  .slide-cap{ margin-top:.9rem; display:flex; justify-content:space-between; align-items:baseline; gap:1rem; }
+  .slide-cap .t{ font-weight:600; font-size:1.02rem; }
+  .slide-cap .n{ font-family:var(--mono); font-size:.66rem; letter-spacing:.12em; color:var(--mute); white-space:nowrap; }
+  .slide-cap .d{ font-family:var(--mono); font-size:.7rem; color:var(--mute); margin-top:.2rem; }
+
+  /* arrows + dots */
+  .carousel-ctl{ display:flex; align-items:center; justify-content:space-between; margin-top:1.4rem; }
+  .dots{ display:flex; gap:.5rem; }
+  .dot{ width:8px; height:8px; border:1px solid var(--blue); background:transparent; padding:0; cursor:pointer; transition:background .2s; }
+  .dot.on{ background:var(--blue); }
+  .arrows{ display:flex; gap:.6rem; }
+  .arrow{ width:42px; height:42px; border:1px solid var(--line); background:var(--paper); cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--ink); transition:border-color .2s, color .2s; }
+  .arrow:hover{ border-color:var(--blue); color:var(--blue); }
+  .arrow svg{ width:16px; height:16px; }
+
+  /* ====== to use a real photo/video in a slide, replace the .slide-ph block with:
+     <img src="box-open.jpg" alt="…">      → and add: .slide-frame img{ width:100%; height:100%; object-fit:cover; display:block; }
+     <video autoplay muted loop playsinline></video> for the freewheel clip (same object-fit rule)
+  ====== */
+
+  /* ---------------- spec section ---------------- */
+  .specs{ padding:clamp(4rem,9vw,7rem) 0; border-top:1px solid var(--line); }
+  .specs .eyebrow{ font-family:var(--mono); font-size:.74rem; letter-spacing:.2em; text-transform:uppercase; color:var(--blue); margin-bottom:1rem; }
+  .specs h2{ font-weight:600; font-size:clamp(1.8rem,4vw,2.7rem); letter-spacing:-.01em; max-width:18ch; }
+  .specs p{ margin-top:1.2rem; max-width:52ch; color:var(--mute); }
+  .spec-grid{ display:grid; grid-template-columns:repeat(3,1fr); margin-top:2.6rem; border:1px solid var(--line); }
+  .spec-cell{ padding:1.8rem 1.6rem; border-right:1px solid var(--line); }
+  .spec-cell:last-child{ border-right:0; }
+  .spec-cell .k{ font-family:var(--mono); font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--mute); }
+  .spec-cell .v{ font-family:var(--mono); font-weight:600; font-size:clamp(1.5rem,3vw,2rem); margin-top:.5rem; color:var(--blue); }
+  @media (max-width:680px){ .spec-grid{ grid-template-columns:1fr; } .spec-cell{ border-right:0; border-bottom:1px solid var(--line); } .spec-cell:last-child{ border-bottom:0; } }
+
+  /* ---------------- early-bird ---------------- */
+  .earlybird{ padding:clamp(4.5rem,10vw,8rem) 0; border-top:1px solid var(--line); }
+  .eb-box{ position:relative; border:1.5px solid var(--blue); padding:clamp(2rem,5vw,3.4rem); max-width:700px; background:var(--paper); }
+  .eb-box::before{ content:"RESERVATION"; position:absolute; top:-9px; left:24px; background:var(--paper); padding:0 .6rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.2em; color:var(--blue); }
+  .eb-box .eyebrow{ font-family:var(--mono); font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--mute); margin-bottom:1rem; }
+  .eb-box h2{ font-weight:600; font-size:clamp(1.9rem,4.6vw,2.9rem); line-height:1.08; letter-spacing:-.01em; }
+  .eb-box h2 .u{ color:var(--blue); }
+  .eb-box .lead{ margin-top:1.2rem; max-width:50ch; color:var(--mute); font-size:1.05rem; }
+  .eb-points{ list-style:none; margin:1.8rem 0 0; padding:0; display:flex; flex-direction:column; gap:.75rem; }
+  .eb-points li{ position:relative; padding-left:1.6rem; color:var(--ink); }
+  .eb-points li::before{ content:""; position:absolute; left:0; top:.55em; width:8px; height:8px; background:var(--blue); }
+  .eb-cta{ display:inline-flex; align-items:center; gap:.7rem; margin-top:2.2rem; background:var(--blue); color:var(--paper); text-decoration:none;
+           font-family:var(--disp); font-weight:600; font-size:1.02rem; padding:1rem 1.9rem; transition:background .25s, transform .15s; }
+  .eb-cta:hover{ background:var(--ink); transform:translateY(-1px); }
+  .eb-cta .amt{ font-family:var(--mono); font-size:.92rem; opacity:.9; }
+  .eb-fine{ margin-top:1.4rem; font-size:.82rem; color:var(--mute); max-width:48ch; line-height:1.55; }
+
+  /* ---------------- footer ---------------- */
+  footer{ border-top:1px solid var(--line); padding:34px 0 50px; }
+  .foot{ display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .foot img{ height:26px; opacity:.85; }
+  .foot .meta{ font-family:var(--mono); font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); }
+
+  /* shared scroll reveal */
+  .fade{ opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
   .fade.in{ opacity:1; transform:none; }
-
-  footer{ border-top:1px solid var(--line); padding:30px 0 44px; font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); text-align:center; }
-
-  /* ---------- early-bird offer ---------- */
-  .earlybird{ padding:clamp(4.5rem,10vw,8rem) 0; border-top:1px solid var(--line); background:linear-gradient(180deg,var(--paper),#F2F6FC); }
-  .eb-box{ position:relative; border:1.5px solid var(--ink); padding:clamp(2rem,5vw,3.4rem); max-width:680px; }
-  .eb-box .eyebrow{ color:var(--blue-ln); margin-bottom:1.1rem; }
-  .eb-box h2{ font-size:clamp(1.9rem,4.6vw,3rem); line-height:1.08; }
-  .eb-box h2 em{ font-style:normal; color:var(--blue-ln); }
-  .eb-box .lead{ margin-top:1.2rem; max-width:48ch; color:var(--slate); font-size:1.05rem; }
-  .eb-points{ list-style:none; margin:1.8rem 0 0; padding:0; display:flex; flex-direction:column; gap:.7rem; }
-  .eb-points li{ position:relative; padding-left:1.5rem; color:var(--ink); }
-  .eb-points li::before{ content:""; position:absolute; left:0; top:.62em; width:7px; height:7px; background:var(--blue-ln); }
-  .eb-cta{ display:inline-flex; align-items:center; gap:.7rem; margin-top:2.2rem; background:var(--ink); color:#fff; text-decoration:none;
-           font-family:var(--sans); font-weight:600; font-size:1.02rem; letter-spacing:.01em; padding:1rem 1.8rem; transition:background .25s ease, transform .15s ease; }
-  .eb-cta:hover{ background:var(--blue-ln); transform:translateY(-1px); }
-  .eb-cta .amt{ font-family:var(--mono); font-size:.9rem; opacity:.85; }
-  .eb-fine{ margin-top:1.4rem; font-size:.82rem; color:var(--mute); max-width:46ch; line-height:1.5; }
+  @media (prefers-reduced-motion: reduce){ .fade{ opacity:1; transform:none; transition:none; } html{ scroll-behavior:auto; } }
 </style>
 </head>
 <body>
 
-<section class="intro">
-  <div class="wrap">
-    <div class="eyebrow">TinyByk &middot; scroll sequence</div>
-    <h1>See the bike come together as you <em>scroll.</em></h1>
-    <p>A live render from your Keyshot animation, with a transparent background so it sits directly on the page. Frames load progressively — nearest to your scroll position first.</p>
+<header>
+  <div class="bar">
+    <a class="brand" href="#top" aria-label="TinyByk home"><img src="Logos&Branding/TinyByk Logo Website COLOUR.svg" alt="TinyByk"></a>
+    <nav class="nav">
+      <a href="#how">The build</a>
+      <a href="#spec">Spec</a>
+      <a href="#reserve" class="reserve">Reserve · $5</a>
+    </nav>
   </div>
-</section>
+</header>
 
-<section class="stage" id="stage">
-  <div class="sticky">
-    <div class="driftwrap" id="driftwrap">
-      <canvas id="seq"></canvas>
+<main id="top">
 
-      <div class="overlay" id="overlay">
-        <!-- EDIT: each line rises into place once scroll passes its data-from point (0–1). They stay, accumulating. -->
-        <div class="tagline-zone">
-          <span class="bx t"></span><span class="bx r"></span><span class="bx b"></span><span class="bx l"></span>
-          <div class="tagline" data-from="0.06" data-to="0.34">40 parts</div>
-          <div class="tagline" data-from="0.30" data-to="0.58">All-metal frame</div>
-          <div class="tagline" data-from="0.54" data-to="0.82">130&thinsp;kg weight limit</div>
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="kicker">Congruent Technologies · Kickstarter early 2027</div>
+      <h1>The smallest bike <span class="y">an adult can actually ride.</span></h1>
+      <p class="sub">A fully engineered, all-metal micro-bike — designed from the part up, toleranced on purpose, and built to carry a real rider.</p>
+
+      <div class="dims">
+        <div class="dim"><div class="k">Parts</div><div class="v">40</div></div>
+        <div class="dim"><div class="k">Frame</div><div class="v">All&#8209;metal</div></div>
+        <div class="dim"><div class="k">Rider limit</div><div class="v">130 kg</div></div>
+      </div>
+
+      <!-- ===== HERO VIDEO PLACEHOLDER ===== -->
+      <div class="reel">
+        <div class="reel-frame">
+          <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+          <div class="reel-ph">
+            <div class="play"></div>
+            <div class="lbl">Hero reel — drop video here</div>
+          </div>
+        </div>
+        <div class="reel-cap"><span>REEL / 01</span><span>1920×1080 · ~7s loop</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SCROLL SEQUENCE ===================== -->
+  <section class="seqsection" id="how">
+    <div class="wrap">
+      <div class="eyebrow">The build · exploded view</div>
+      <h2>Scroll to watch it come together.</h2>
+      <p class="note">Every component, in assembly order — rendered straight from the engineering model.</p>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="sticky">
+        <div class="driftwrap" id="driftwrap">
+          <canvas id="seq"></canvas>
+          <div class="overlay" id="overlay">
+            <div class="tagline-zone">
+              <span class="bx t"></span><span class="bx r"></span><span class="bx b"></span><span class="bx l"></span>
+              <div class="tagline" data-from="0.06" data-to="0.34">40 parts</div>
+              <div class="tagline" data-from="0.30" data-to="0.58">All-metal frame</div>
+              <div class="tagline" data-from="0.54" data-to="0.82">130&thinsp;kg <span class="u">weight limit</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="tag-tl">TinyByk · exploded assembly</div>
+        <div class="cue" id="cue"><span class="ln"></span>Scroll</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== WHAT'S IN THE BOX (carousel) ===================== -->
+  <section class="box-sec" id="box">
+    <div class="wrap">
+      <div class="eyebrow fade">What's in the box</div>
+      <h2 class="fade">The real thing, up close.</h2>
+      <p class="note fade">Everything that ships, and how it goes together — real photos of the actual bike, not renders. Swipe through the kit, the drivetrain, and a quick look at it rolling.</p>
+      <div class="swipehint fade"><span>←</span> Swipe or use the arrows <span>→</span></div>
+
+      <div class="carousel fade">
+        <div class="track" id="track">
+
+          <div class="slide">
+            <div class="slide-frame">
+              <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+              <div class="slide-ph"><div class="ic">▦</div><div class="ph-lbl">Photo — open box, full kit</div></div>
+            </div>
+            <div class="slide-cap"><div><div class="t">Everything in the box</div><div class="d">The complete kit as it ships, packed and ready.</div></div><div class="n">01 / 05</div></div>
+          </div>
+
+          <div class="slide">
+            <div class="slide-frame">
+              <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+              <div class="slide-ph"><div class="ic">◎</div><div class="ph-lbl">Photo — sprocket & chain</div></div>
+            </div>
+            <div class="slide-cap"><div><div class="t">Drivetrain</div><div class="d">Sprocket, chain and tensioning — close up.</div></div><div class="n">02 / 05</div></div>
+          </div>
+
+          <div class="slide">
+            <div class="slide-frame">
+              <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+              <div class="slide-ph"><div class="ic">⊙</div><div class="ph-lbl">Photo — pedal assembly</div></div>
+            </div>
+            <div class="slide-cap"><div><div class="t">Pedal &amp; crank</div><div class="d">The crank and pedal assembly in detail.</div></div><div class="n">03 / 05</div></div>
+          </div>
+
+          <div class="slide">
+            <div class="slide-frame">
+              <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+              <div class="slide-ph"><div class="ic">⌒</div><div class="ph-lbl">Photo — handlebars</div></div>
+            </div>
+            <div class="slide-cap"><div><div class="t">Handlebars &amp; controls</div><div class="d">Bar, grips and steering interface.</div></div><div class="n">04 / 05</div></div>
+          </div>
+
+          <div class="slide">
+            <div class="slide-frame">
+              <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+              <div class="slide-ph video"><div class="ic"></div><div class="ph-lbl">Video — freewheel across a table</div></div>
+            </div>
+            <div class="slide-cap"><div><div class="t">It actually rolls</div><div class="d">A quick freewheel to show real size and motion.</div></div><div class="n">05 / 05</div></div>
+          </div>
+
+        </div>
+
+        <div class="carousel-ctl">
+          <div class="dots" id="dots"></div>
+          <div class="arrows">
+            <button class="arrow" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <button class="arrow" id="next" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+          </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="tag-tl">TinyByk exploded animation</div>
-    <div class="cue" id="cue"><span class="ln"></span>Scroll</div>
-  </div>
-</section>
-
-<section class="content">
-  <div class="wrap">
-    <div class="eyebrow fade">Why it exists</div>
-    <h2 class="fade">A real vehicle, <em>not a toy.</em></h2>
-    <p class="fade">TinyByk packs a full-size ride into the smallest footprint we could engineer — without the wobble, flex, or cut corners that make small rideables feel cheap. Every joint is load-rated, every interface is toleranced, and the whole thing folds down to something you can carry.</p>
-  </div>
-</section>
-
-<section class="content">
-  <div class="wrap">
-    <div class="eyebrow fade">The numbers</div>
-    <h2 class="fade">Built to spec, <em>not to a price point.</em></h2>
-    <div class="specs">
-      <div class="spec fade"><div class="k">Rider limit</div><div class="val">120 kg</div></div>
-      <div class="spec fade"><div class="k">Frame</div><div class="val">All metal</div></div>
-      <div class="spec fade"><div class="k">Folded size</div><div class="val">Carry-on</div></div>
+  <!-- ===================== SPEC ===================== -->
+  <section class="specs" id="spec">
+    <div class="wrap">
+      <div class="eyebrow fade">Why it's different</div>
+      <h2 class="fade">A real vehicle, not a toy.</h2>
+      <p class="fade">Small rideables usually flex, wobble, and cut corners. TinyByk doesn't. Every joint is load-rated, every interface is toleranced, and the whole thing is built to be ridden — then folded down and carried.</p>
+      <div class="spec-grid">
+        <div class="spec-cell fade"><div class="k">Component count</div><div class="v">40</div></div>
+        <div class="spec-cell fade"><div class="k">Rider limit</div><div class="v">130 kg</div></div>
+        <div class="spec-cell fade"><div class="k">Folded size</div><div class="v">Carry-on</div></div>
+      </div>
     </div>
-    <p class="fade" style="margin-top:2rem;">Placeholder figures — swap these for your real spec numbers once they're locked.</p>
-  </div>
-</section>
+  </section>
 
-<section class="earlybird">
+  <!-- ===================== EARLY BIRD ===================== -->
+  <section class="earlybird" id="reserve">
+    <div class="wrap">
+      <div class="eb-box fade">
+        <div class="eyebrow">Early bird · limited</div>
+        <h2>Lock in your <span class="u">early-bird price</span> for $5.</h2>
+        <p class="lead">TinyByk launches on Kickstarter in early 2027. Reserve now and your $5 secures the lowest price we'll ever offer — before the campaign opens to everyone else.</p>
+        <ul class="eb-points">
+          <li>Locks in early-bird pricing on your TinyByk when the Kickstarter launches</li>
+          <li>Your $5 is credited toward your pledge — it's not an extra cost</li>
+          <li>First in line for launch-day notifications and updates</li>
+        </ul>
+        <a class="eb-cta" href="https://buy.stripe.com/7sYbJ0bAu7Fe9SYbTK7Zu00">Reserve my early-bird price <span class="amt">$5</span></a>
+        <p class="eb-fine">This is a reservation, not a product purchase — TinyByk is not yet in production. Your $5 reserves your early-bird pricing and is credited toward your Kickstarter pledge. Fully refundable on request. Payment is handled securely by Stripe.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
   <div class="wrap">
-    <div class="eb-box fade">
-      <div class="eyebrow">Early bird &middot; limited</div>
-      <h2>Lock in your <em>early-bird price</em> for $5.</h2>
-      <p class="lead">TinyByk launches on Kickstarter in early 2027. Reserve now and your $5 secures the lowest price we'll ever offer — before the campaign goes live to everyone else.</p>
-      <ul class="eb-points">
-        <li>Locks in early-bird pricing on your TinyByk when the Kickstarter launches</li>
-        <li>Your $5 is credited toward your pledge — it's not an extra cost</li>
-        <li>First in line for launch-day notifications and updates</li>
-      </ul>
-      <a class="eb-cta" href="https://buy.stripe.com/7sYbJ0bAu7Fe9SYbTK7Zu00">Reserve my early-bird price <span class="amt">$5</span></a>
-      <p class="eb-fine">This is a reservation, not a product purchase — TinyByk is not yet in production. Your $5 reserves your early-bird pricing and is credited toward your Kickstarter pledge. Fully refundable on request. Payment is handled securely by Stripe.</p>
+    <div class="foot">
+      <img src="Logos&Branding/TinyByk Logo Website COLOUR.svg" alt="TinyByk">
+      <span class="meta">Congruent Technologies · Brisbane · © 2026</span>
     </div>
   </div>
-</section>
-
-<footer>Congruent Technologies &middot; TinyByk sequence</footer>
+</footer>
 
 <script>
 (function(){
   // ============================================================
-  // CONFIG — TinyByk 1:1 square PNG frames 116–163 (48 total)
+  // TinyByk scroll-sequence engine (portrait WebP, 31 frames)
   // ============================================================
   const CONFIG = {
-    frameCount:     31,
-    useRealImages:  true,
-    simulateLoading: false,
-    framePath: (i) => `webp_output2/ExplodedAnimationLANDINGPAGE1.63.${118+i}.webp`,
-    eager:          31,    // load ALL frames upfront — the whole set is tiny now
-    maxConcurrent:  8,     // more parallel fetches
+    frameCount:     81,
+    framePath: (i) => `webp_output3/ExplodedAnimationLANDINGPAGE1.64.${118+i}.webp`,
+    eager:          81,
+    maxConcurrent:  8,
     scrollSpan:     160,
     reverse:        true,
     lerp:           1.9,
-    imageAspect:    1280/2048   // portrait — used to size the tagline zone to the visible image area
+    imageAspect:    1280/2048
   };
 
-  const BG = '#FAFBFD';
+  const BG = '#F4F6FA';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const canvas=document.getElementById('seq'), ctx=canvas.getContext('2d',{ alpha:true, desynchronized:true });
@@ -207,25 +430,17 @@
     W=canvas.clientWidth; H=canvas.clientHeight;
     canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
     positionOverlay();
-    lastDrawn=-1;   // canvas was cleared by the resize — force the next draw
+    lastDrawn=-1;
   }
-
-  // calculate where the contained image actually sits inside the canvas,
-  // then position the overlay to match its bottom-left corner and width.
   function positionOverlay(){
     const ar=CONFIG.imageAspect, cr=W/H;
     let dw,dh;
     if(ar>cr){ dw=W; dh=W/ar; } else { dh=H; dw=H*ar; }
-    const left=(W-dw)/2;
-    const bottom=(H-dh)/2;   // distance from canvas bottom to image bottom
-    overlay.style.setProperty('--img-left',  left+'px');
-    overlay.style.setProperty('--img-bottom',bottom+'px');
+    overlay.style.setProperty('--img-left',  (W-dw)/2+'px');
+    overlay.style.setProperty('--img-bottom',(H-dh)/2+'px');
     overlay.style.setProperty('--img-w',     dw+'px');
   }
 
-  // ============================================================
-  // PROGRESSIVE LOADER
-  // ============================================================
   let cur=0, dir=1, lastDrawn=-1;
   function pickNext(){
     let best=-1, bestCost=Infinity;
@@ -242,7 +457,6 @@
   function loadOne(i){
     const done=ok=>{ status[i]=ok?2:3; inFlight--; lastDrawn=-1; pump(); };
     const url=CONFIG.framePath(i);
-    // createImageBitmap decodes off the main thread → far smoother canvas draws on mobile
     if(window.createImageBitmap){
       fetch(url).then(r=>{ if(!r.ok) throw 0; return r.blob(); })
         .then(b=>createImageBitmap(b))
@@ -262,9 +476,6 @@
     }
   }
 
-  // ============================================================
-  // DRAWING
-  // ============================================================
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   function nearestReady(i){
     if(status[i]===2) return i;
@@ -276,10 +487,9 @@
   }
   function drawWaiting(){
     ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='rgba(110,155,203,.55)'; ctx.font='13px "IBM Plex Mono", monospace';
+    ctx.fillStyle='rgba(0,74,173,.5)'; ctx.font='13px "IBM Plex Mono", monospace';
     ctx.textAlign='center'; ctx.fillText('LOADING…', W/2, H/2); ctx.textAlign='left';
   }
-  // CONTAIN-fit using the configured image aspect (works for square or any other)
   function containDraw(img){
     ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
     const ar=CONFIG.imageAspect, cr=W/H; let dw,dh;
@@ -290,15 +500,14 @@
     i=clamp(Math.round(i),0,N-1);
     const j=nearestReady(i);
     if(j<0){ drawWaiting(); lastDrawn=-1; return; }
-    if(j===lastDrawn) return;            // already showing this frame — skip the redraw
+    if(j===lastDrawn) return;
     if(images[j]){ containDraw(images[j]); lastDrawn=j; }
     else { drawWaiting(); lastDrawn=-1; }
   }
 
-  // Each tagline travels up from below into its resting spot; a box draws around them.
   const box={ t:document.querySelector('.bx.t'), r:document.querySelector('.bx.r'),
               b:document.querySelector('.bx.b'), l:document.querySelector('.bx.l') };
-  const boxStart=0.06, boxEnd=0.82;   // matches first data-from … last data-to
+  const boxStart=0.06, boxEnd=0.82;
   function updatePanels(p){
     const travel = Math.max(window.innerHeight*0.55, 360);
     panels.forEach(el=>{
@@ -308,9 +517,8 @@
       el.style.transform = `translateY(${(1-ease)*travel}px)`;
       el.style.opacity = t<=0 ? 0 : 1;
     });
-    // box: draws clockwise (top → right → bottom → left) across the whole span
     let bp = clamp((p-boxStart)/(boxEnd-boxStart),0,1);
-    const seg = q => clamp((bp-q*0.25)/0.25,0,1)*100;   // each side fills over a quarter
+    const seg = q => clamp((bp-q*0.25)/0.25,0,1)*100;
     if(box.t){
       box.t.style.width  = seg(0)+'%';
       box.r.style.height = seg(1)+'%';
@@ -319,9 +527,6 @@
     }
   }
 
-  // ============================================================
-  // SCROLL → FRAME loop
-  // ============================================================
   let target=0, lastCur=0;
   function progress(){
     const top=stage.getBoundingClientRect().top;
@@ -336,9 +541,8 @@
     pump();
     drawIndex(cur);
     updatePanels(p);
-    // whole block drifts upward as you scroll: starts low, settles near the top
-    const driftStart = window.innerHeight*0.16;   // px lower than centre at the start
-    const driftEnd   = -window.innerHeight*0.12;  // px higher than centre at the end
+    const driftStart = window.innerHeight*0.16;
+    const driftEnd   = -window.innerHeight*0.12;
     driftwrap.style.transform = `translateY(${driftStart+(driftEnd-driftStart)*p}px)`;
     if(p>0.02) cue.style.opacity=0; else cue.style.opacity=0.5;
     requestAnimationFrame(loop);
@@ -360,7 +564,7 @@
   window.addEventListener('resize', resize);
   start();
 
-  // content fade-ins
+  // scroll reveals
   const fades=[...document.querySelectorAll('.fade')];
   if('IntersectionObserver' in window){
     const io=new IntersectionObserver((es)=>{
@@ -370,6 +574,46 @@
   } else {
     fades.forEach(el=>el.classList.add('in'));
   }
+  // ============================================================
+  // What's-in-the-box carousel (native scroll-snap + dots/arrows)
+  // ============================================================
+  (function carousel(){
+    const track=document.getElementById('track');
+    if(!track) return;
+    const slides=[...track.children];
+    const dotsWrap=document.getElementById('dots');
+    const prev=document.getElementById('prev'), next=document.getElementById('next');
+
+    // build dots
+    slides.forEach((_,i)=>{
+      const d=document.createElement('button');
+      d.className='dot'+(i===0?' on':''); d.setAttribute('aria-label','Go to slide '+(i+1));
+      d.addEventListener('click',()=>scrollToSlide(i));
+      dotsWrap.appendChild(d);
+    });
+    const dots=[...dotsWrap.children];
+
+    function scrollToSlide(i){
+      const s=slides[i]; if(!s) return;
+      track.scrollTo({ left:s.offsetLeft-(track.clientWidth-s.clientWidth)/2, behavior:'smooth' });
+    }
+    function current(){
+      // nearest slide to the track's horizontal centre
+      const c=track.scrollLeft+track.clientWidth/2;
+      let best=0, bestD=Infinity;
+      slides.forEach((s,i)=>{ const sc=s.offsetLeft+s.clientWidth/2; const d=Math.abs(sc-c); if(d<bestD){ bestD=d; best=i; } });
+      return best;
+    }
+    function sync(){
+      const i=current();
+      dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+    }
+    let raf=null;
+    track.addEventListener('scroll',()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ sync(); raf=null; }); });
+    prev.addEventListener('click',()=>scrollToSlide(Math.max(0,current()-1)));
+    next.addEventListener('click',()=>scrollToSlide(Math.min(slides.length-1,current()+1)));
+    window.addEventListener('resize',sync);
+  })();
 })();
 </script>
 
