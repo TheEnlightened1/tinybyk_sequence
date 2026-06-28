@@ -45,7 +45,7 @@
   }
   .tagline-zone{
     position:relative; display:inline-flex; flex-direction:column; align-items:flex-start; gap:.5em;
-    margin-left:4%; margin-bottom:2%; padding:1.1em 1.4em;
+    margin-left:4%; margin-bottom:4%; padding:1.1em 1.4em;
   }
   /* the box: four borders that draw in as the lines arrive, completing on settle */
   .bx{ position:absolute; background:var(--ink); }
@@ -59,7 +59,7 @@
     color:var(--ink); will-change:transform; opacity:0;
   }
   .tagline em{ font-style:normal; color:var(--blue-ln); }
-  @media (max-width:760px){ .tagline-zone{ margin-left:6%; margin-bottom:-5%; } }
+  @media (max-width:760px){ .tagline-zone{ margin-left:6%; margin-bottom:6%; } }
 
   .dock{ position:absolute; left:28px; right:28px; bottom:22px; z-index:5; }
   .dockrow{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--slate); margin-bottom:8px; }
@@ -79,6 +79,22 @@
   .fade.in{ opacity:1; transform:none; }
 
   footer{ border-top:1px solid var(--line); padding:30px 0 44px; font-family:var(--mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); text-align:center; }
+
+  /* ---------- early-bird offer ---------- */
+  .earlybird{ padding:clamp(4.5rem,10vw,8rem) 0; border-top:1px solid var(--line); background:linear-gradient(180deg,var(--paper),#F2F6FC); }
+  .eb-box{ position:relative; border:1.5px solid var(--ink); padding:clamp(2rem,5vw,3.4rem); max-width:680px; }
+  .eb-box .eyebrow{ color:var(--blue-ln); margin-bottom:1.1rem; }
+  .eb-box h2{ font-size:clamp(1.9rem,4.6vw,3rem); line-height:1.08; }
+  .eb-box h2 em{ font-style:normal; color:var(--blue-ln); }
+  .eb-box .lead{ margin-top:1.2rem; max-width:48ch; color:var(--slate); font-size:1.05rem; }
+  .eb-points{ list-style:none; margin:1.8rem 0 0; padding:0; display:flex; flex-direction:column; gap:.7rem; }
+  .eb-points li{ position:relative; padding-left:1.5rem; color:var(--ink); }
+  .eb-points li::before{ content:""; position:absolute; left:0; top:.62em; width:7px; height:7px; background:var(--blue-ln); }
+  .eb-cta{ display:inline-flex; align-items:center; gap:.7rem; margin-top:2.2rem; background:var(--ink); color:#fff; text-decoration:none;
+           font-family:var(--sans); font-weight:600; font-size:1.02rem; letter-spacing:.01em; padding:1rem 1.8rem; transition:background .25s ease, transform .15s ease; }
+  .eb-cta:hover{ background:var(--blue-ln); transform:translateY(-1px); }
+  .eb-cta .amt{ font-family:var(--mono); font-size:.9rem; opacity:.85; }
+  .eb-fine{ margin-top:1.4rem; font-size:.82rem; color:var(--mute); max-width:46ch; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -133,11 +149,20 @@
   </div>
 </section>
 
-<section class="content">
+<section class="earlybird">
   <div class="wrap">
-    <div class="eyebrow fade">Coming soon</div>
-    <h2 class="fade">Back it on <em>Kickstarter.</em></h2>
-    <p class="fade">Launching February 2027. This page is an early look — the full campaign, pricing, and reward tiers are on the way.</p>
+    <div class="eb-box fade">
+      <div class="eyebrow">Early bird &middot; limited</div>
+      <h2>Lock in your <em>early-bird price</em> for $5.</h2>
+      <p class="lead">TinyByk launches on Kickstarter in early 2027. Reserve now and your $5 secures the lowest price we'll ever offer — before the campaign goes live to everyone else.</p>
+      <ul class="eb-points">
+        <li>Locks in early-bird pricing on your TinyByk when the Kickstarter launches</li>
+        <li>Your $5 is credited toward your pledge — it's not an extra cost</li>
+        <li>First in line for launch-day notifications and updates</li>
+      </ul>
+      <a class="eb-cta" href="https://buy.stripe.com/7sYbJ0bAu7Fe9SYbTK7Zu00">Reserve my early-bird price <span class="amt">$5</span></a>
+      <p class="eb-fine">This is a reservation, not a product purchase — TinyByk is not yet in production. Your $5 reserves your early-bird pricing and is credited toward your Kickstarter pledge. Fully refundable on request. Payment is handled securely by Stripe.</p>
+    </div>
   </div>
 </section>
 
@@ -155,7 +180,7 @@
     framePath: (i) => `webp_output2/ExplodedAnimationLANDINGPAGE1.63.${118+i}.webp`,
     eager:          31,    // load ALL frames upfront — the whole set is tiny now
     maxConcurrent:  8,     // more parallel fetches
-    scrollSpan:     140,
+    scrollSpan:     160,
     reverse:        true,
     lerp:           1.9,
     imageAspect:    1280/2048   // portrait — used to size the tagline zone to the visible image area
