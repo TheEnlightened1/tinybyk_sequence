@@ -195,6 +195,30 @@
   .eb-cta .amt{ font-family:var(--mono); font-size:.92rem; opacity:.9; }
   .eb-fine{ margin-top:1.4rem; font-size:.82rem; color:var(--mute); max-width:48ch; line-height:1.55; }
 
+  /* ---------------- secondary signup (email/SMS — subordinate to the $5 CTA) ---------------- */
+  .eb-alt{ margin-top:2.4rem; padding-top:1.8rem; border-top:1px dashed var(--line); }
+  .eb-alt .alt-label{ font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); margin-bottom:.7rem; }
+  .eb-alt .alt-lead{ font-size:.92rem; color:var(--mute); max-width:44ch; margin-bottom:1.1rem; }
+  .alt-form{ display:flex; flex-direction:column; gap:.7rem; max-width:420px; }
+  .alt-row{ display:flex; gap:.6rem; flex-wrap:wrap; }
+  .alt-row input[type="email"], .alt-row input[type="tel"]{
+    flex:1 1 180px; min-width:0; font-family:var(--disp); font-size:.92rem; color:var(--ink);
+    background:var(--paper); border:1px solid var(--line); padding:.7rem .9rem;
+  }
+  .alt-row input:focus{ outline:none; border-color:var(--blue); }
+  .alt-check{ display:flex; align-items:flex-start; gap:.55rem; font-family:var(--mono); font-size:.68rem; color:var(--mute); line-height:1.5; }
+  .alt-check input{ margin-top:.2rem; accent-color:var(--blue); }
+  .alt-submit{
+    align-self:flex-start; background:transparent; color:var(--blue); border:1px solid var(--blue);
+    font-family:var(--disp); font-weight:600; font-size:.9rem; padding:.75rem 1.5rem; cursor:pointer;
+    transition:background .2s, color .2s;
+  }
+  .alt-submit:hover{ background:var(--blue); color:var(--paper); }
+  .alt-submit:disabled{ opacity:.6; cursor:default; }
+  .alt-status{ font-family:var(--mono); font-size:.72rem; margin-top:.3rem; min-height:1em; }
+  .alt-status.ok{ color:var(--blue); }
+  .alt-status.err{ color:#B3261E; }
+
   /* ---------------- footer ---------------- */
   footer{ border-top:1px solid var(--line); padding:34px 0 50px; }
   .foot{ display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
@@ -350,6 +374,27 @@
         </ul>
         <a class="eb-cta" href="https://buy.stripe.com/7sYbJ0bAu7Fe9SYbTK7Zu00">Reserve my early-bird price <span class="amt">$5</span></a>
         <p class="eb-fine">This is a reservation, not a product purchase — TinyByk is not yet in production. Your $5 reserves your early-bird pricing and is credited toward your Kickstarter pledge. Fully refundable on request. Payment is handled securely by Stripe.</p>
+
+        <div class="eb-alt">
+          <div class="alt-label">Not ready to reserve?</div>
+          <p class="alt-lead">Join the list for early access and updates — no payment, just the news first.</p>
+          <form class="alt-form" id="signup-form">
+            <!-- SMS fields removed for now — re-add once Klaviyo SMS numbers are set up (see script comment below).
+                 To bring it back, restore this block inside .alt-row:
+                 <input type="tel" id="signup-phone" placeholder="Phone (optional)">
+                 …and this checkbox right after the closing </div> of .alt-row:
+                 <label class="alt-check">
+                   <input type="checkbox" id="signup-sms">
+                   Text me updates too — msg &amp; data rates may apply. Requires a phone number above.
+                 </label>
+            -->
+            <div class="alt-row">
+              <input type="email" id="signup-email" placeholder="Email address" required>
+            </div>
+            <button type="submit" class="alt-submit" id="signup-submit">Join the list</button>
+            <div class="alt-status" id="signup-status"></div>
+          </form>
+        </div>
       </div>
     </div>
   </section>
@@ -552,6 +597,82 @@
     next.addEventListener('click',()=>scrollToSlide(Math.min(slides.length-1,current()+1)));
     window.addEventListener('resize',sync);
   })();
+})();
+</script>
+
+<script>
+(function(){
+  // ============================================================
+  // Klaviyo signup — email + optional SMS.
+  // This is a hand-built form (matches the page's own styling) that
+  // talks directly to Klaviyo's API — no Klaviyo popup/embed involved.
+  // ------------------------------------------------------------
+  // BEFORE THIS GOES LIVE, fill in these two values from your Klaviyo account:
+  //   COMPANY_ID — Klaviyo > Settings > Account > API Keys > "Public API Key".
+  //                This one is SAFE to expose in the browser (it is NOT the private key).
+  //   LIST_ID    — Klaviyo > Lists & Segments > open the list you want signups
+  //                to land in > the ID is in the page URL, e.g. .../lists/XXXXXX
+  // ============================================================
+  const COMPANY_ID = 'SPPjTu';
+  const LIST_ID     = 'UwycXj';
+
+  const form   = document.getElementById('signup-form');
+  if(!form) return;
+  const emailEl = document.getElementById('signup-email');
+  // SMS re-add point: once phone/SMS numbers are set up in Klaviyo, restore these two lines
+  // (and the matching HTML fields above) — const phoneEl = document.getElementById('signup-phone');
+  // const smsBox = document.getElementById('signup-sms');
+  const btn     = document.getElementById('signup-submit');
+  const status  = document.getElementById('signup-status');
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    status.textContent = '';
+    status.className = 'alt-status';
+
+    const emailVal = emailEl.value.trim();
+
+    // email-only for now — see SMS re-add point above and in the HTML comment
+    // to bring phone_number + sms consent back into this object later
+    const attributes = { email: emailVal };
+    const subscriptions = { email: { marketing: { consent: 'SUBSCRIBED' } } };
+
+    const body = {
+      data: {
+        type: 'subscription',
+        attributes: {
+          profile: { data: { type: 'profile', attributes, subscriptions } }
+        },
+        relationships: {
+          list: { data: { type: 'list', id: LIST_ID } }
+        }
+      }
+    };
+
+    btn.disabled = true; btn.textContent = 'Joining…';
+
+    try{
+      const res = await fetch(`https://a.klaviyo.com/client/subscriptions?company_id=${COMPANY_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', revision: '2026-04-15' },
+        body: JSON.stringify(body)
+      });
+
+      if(res.status === 202){
+        status.textContent = "You're on the list.";
+        status.className = 'alt-status ok';
+        form.reset();
+      } else {
+        status.textContent = 'Something went wrong — check your email and try again.';
+        status.className = 'alt-status err';
+      }
+    } catch(err){
+      status.textContent = 'Network error — check your connection and try again.';
+      status.className = 'alt-status err';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Join the list';
+    }
+  });
 })();
 </script>
 
