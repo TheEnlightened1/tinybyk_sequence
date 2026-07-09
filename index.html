@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TinyByk — the smallest bike ever made</title>
+<title>TinyByk — the smallest production bike an adult can ride</title>
+
+<!-- Social share preview (Open Graph + Twitter/X card).
+     og:image needs a real 1200x630 image once you have one — see chat notes. -->
+<meta property="og:title" content="TinyByk — the smallest production bike an adult can ride">
+<meta property="og:description" content="A fully engineered, all-metal micro-bike. Reserve your early-bird price for $5.">
+<meta property="og:url" content="https://tinybyk.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TinyByk — the smallest production bike an adult can ride">
+<meta name="twitter:description" content="A fully engineered, all-metal micro-bike. Reserve your early-bird price for $5.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,10 +102,11 @@
   .reel-frame video{ width:100%; height:100%; object-fit:cover; display:block; }
 
   /* mobile: video goes full-bleed and fills most of the viewport.
-     Note: the 16:9 video is centre-cropped to portrait here — sides get trimmed. */
+     Note: the 16:9 video is centre-cropped to portrait here — sides get trimmed.
+     dvh accounts for in-app browser toolbars (TikTok/Instagram); vh is the fallback for older browsers. */
   @media (max-width:680px){
     .reel{ margin-left:-28px; margin-right:-28px; margin-top:1.2rem; }
-    .reel-frame{ aspect-ratio:auto; height:62vh; border-left:0; border-right:0; }
+    .reel-frame{ aspect-ratio:auto; height:62vh; height:62dvh; border-left:0; border-right:0; }
     .reel-cap{ padding:0 28px; }
   }
 
@@ -105,7 +116,7 @@
   .seqsection h2{ font-weight:600; font-size:clamp(1.6rem,3.6vw,2.4rem); letter-spacing:-.01em; max-width:24ch; }
 
   .stage{ height:340vh; position:relative; }
-  .sticky{ position:sticky; top:0; height:100vh; overflow:hidden; }
+  .sticky{ position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; }
   .driftwrap{ position:absolute; inset:0; will-change:transform; }
   canvas#seq{ display:block; width:100%; height:100%; }
 
@@ -165,18 +176,6 @@
      <img src="box-open.jpg" alt="…">      → and add: .slide-frame img{ width:100%; height:100%; object-fit:cover; display:block; }
      <video autoplay muted loop playsinline></video> for the freewheel clip (same object-fit rule)
   ====== */
-
-  /* ---------------- spec section ---------------- */
-  .specs{ padding:clamp(4rem,9vw,7rem) 0; border-top:1px solid var(--line); }
-  .specs .eyebrow{ font-family:var(--mono); font-size:.74rem; letter-spacing:.2em; text-transform:uppercase; color:var(--blue); margin-bottom:1rem; }
-  .specs h2{ font-weight:600; font-size:clamp(1.8rem,4vw,2.7rem); letter-spacing:-.01em; max-width:18ch; }
-  .specs p{ margin-top:1.2rem; max-width:52ch; color:var(--mute); }
-  .spec-grid{ display:grid; grid-template-columns:repeat(3,1fr); margin-top:2.6rem; border:1px solid var(--line); }
-  .spec-cell{ padding:1.8rem 1.6rem; border-right:1px solid var(--line); }
-  .spec-cell:last-child{ border-right:0; }
-  .spec-cell .k{ font-family:var(--mono); font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--mute); }
-  .spec-cell .v{ font-family:var(--mono); font-weight:600; font-size:clamp(1.5rem,3vw,2rem); margin-top:.5rem; color:var(--blue); }
-  @media (max-width:680px){ .spec-grid{ grid-template-columns:1fr; } .spec-cell{ border-right:0; border-bottom:1px solid var(--line); } .spec-cell:last-child{ border-bottom:0; } }
 
   /* ---------------- early-bird ---------------- */
   .earlybird{ padding:clamp(4.5rem,10vw,8rem) 0; border-top:1px solid var(--line); }
@@ -238,7 +237,6 @@
     <a class="brand" href="#top" aria-label="TinyByk home"><img src="Logos&Branding/TinyByk Logo Website COLOUR.svg" alt="TinyByk"></a>
     <nav class="nav">
       <a href="#how">The build</a>
-      <a href="#spec">Spec</a>
       <a href="#reserve" class="reserve">Reserve · $5</a>
     </nav>
   </div>
@@ -346,20 +344,6 @@
     </div>
   </section>
 
-  <!-- ===================== SPEC ===================== -->
-  <section class="specs" id="spec">
-    <div class="wrap">
-      <div class="eyebrow fade">Why it's different</div>
-      <h2 class="fade">A real vehicle, not a toy.</h2>
-      <p class="fade">Small rideables usually flex, wobble, and cut corners. TinyByk doesn't. Every joint is load-rated, every interface is toleranced, and the whole thing is built to be ridden — then folded down and carried.</p>
-      <div class="spec-grid">
-        <div class="spec-cell fade"><div class="k">Component count</div><div class="v">40</div></div>
-        <div class="spec-cell fade"><div class="k">Rider limit</div><div class="v">130 kg</div></div>
-        <div class="spec-cell fade"><div class="k">Folded size</div><div class="v">Carry-on</div></div>
-      </div>
-    </div>
-  </section>
-
   <!-- ===================== EARLY BIRD ===================== -->
   <section class="earlybird" id="reserve">
     <div class="wrap">
@@ -389,7 +373,7 @@
                  </label>
             -->
             <div class="alt-row">
-              <input type="email" id="signup-email" placeholder="Email address" required>
+              <input type="email" id="signup-email" placeholder="Email address" autocomplete="email" inputmode="email" required>
             </div>
             <button type="submit" class="alt-submit" id="signup-submit">Join the list</button>
             <div class="alt-status" id="signup-status"></div>
@@ -418,8 +402,11 @@
   const CONFIG = {
     frameCount:     81,
     framePath: (i) => `webp_output3/ExplodedAnimationLANDINGPAGE1.64.${118+i}.webp`,
-    eager:          81,
-    maxConcurrent:  8,
+    eager:          10,       // small burst so the sequence has something to show fast — the rest load on approach, not on page load
+    maxConcurrent:  6,
+    decodeW:        960,      // frames are decoded at 960x1536 instead of native 1280x2048 — ~56% less memory per frame, same aspect ratio so nothing looks stretched
+    decodeH:        1536,
+    maxDecoded:     24,       // memory cap — only this many decoded frames are kept at once; ones far from the current position are released and reloaded later if scrolled back to
     scrollSpan:     160,
     reverse:        true,
     lerp:           1.9,
@@ -438,6 +425,21 @@
   const status=new Array(N).fill(0);
   const images=new Array(N);
   let inFlight=0;
+
+  // Don't start downloading the sequence until the visitor is actually approaching it —
+  // on page load this section is well below the fold, and eagerly downloading everything
+  // up front is exactly what was competing with the hero video for bandwidth/memory on
+  // constrained mobile browsers (this is the fix for that).
+  let nearStage=true;
+  if('IntersectionObserver' in window){
+    nearStage=false;
+    const stageObserver=new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){ nearStage=true; stageObserver.disconnect(); }
+      });
+    }, { rootMargin:'800px 0px 800px 0px' });
+    stageObserver.observe(stage);
+  }
 
   let W=0,H=0,dpr=1;
   function resize(){
@@ -465,7 +467,7 @@
     const url=CONFIG.framePath(i);
     if(window.createImageBitmap){
       fetch(url).then(r=>{ if(!r.ok) throw 0; return r.blob(); })
-        .then(b=>createImageBitmap(b))
+        .then(b=>createImageBitmap(b, { resizeWidth:CONFIG.decodeW, resizeHeight:CONFIG.decodeH, resizeQuality:'medium' }))
         .then(bm=>{ images[i]=bm; done(true); })
         .catch(()=>done(false));
     } else {
@@ -476,6 +478,7 @@
     }
   }
   function pump(){
+    if(!nearStage) return; // hold off until the visitor has scrolled near the sequence
     while(inFlight<CONFIG.maxConcurrent){
       const i=pickNext(); if(i<0) break;
       status[i]=1; inFlight++; loadOne(i);
@@ -490,6 +493,19 @@
       if(i+d<N  && status[i+d]===2) return i+d;
     }
     return -1;
+  }
+  function evictFar(){
+    // keep only a window of decoded frames around the current position; release the rest
+    // (frames outside the window just get reloaded later if the visitor scrolls back to them —
+    // the LOADING fallback in drawIndex already handles that gracefully)
+    const half=Math.max(6, Math.floor(CONFIG.maxDecoded/2));
+    for(let i=0;i<N;i++){
+      if(status[i]===2 && Math.abs(i-cur)>half){
+        if(images[i] && typeof images[i].close==='function') images[i].close();
+        images[i]=undefined;
+        status[i]=0;
+      }
+    }
   }
   function drawWaiting(){
     ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
@@ -524,6 +540,7 @@
     dir = cur>=lastCur ? 1 : -1; lastCur=cur;
     pump();
     drawIndex(cur);
+    evictFar();
     const driftStart = window.innerHeight*0.16;
     const driftEnd   = -window.innerHeight*0.12;
     driftwrap.style.transform = `translateY(${driftStart+(driftEnd-driftStart)*p}px)`;
