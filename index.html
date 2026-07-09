@@ -402,11 +402,10 @@
   const CONFIG = {
     frameCount:     81,
     framePath: (i) => `webp_output3/ExplodedAnimationLANDINGPAGE1.64.${118+i}.webp`,
-    eager:          10,       // small burst so the sequence has something to show fast — the rest load on approach, not on page load
-    maxConcurrent:  6,
+    eager:          0,        // no artificial priority bucket — pure proximity-to-current-frame picking, so it always prioritizes what you're actually scrolling toward
+    maxConcurrent:  8,
     decodeW:        960,      // frames are decoded at 960x1536 instead of native 1280x2048 — ~56% less memory per frame, same aspect ratio so nothing looks stretched
     decodeH:        1536,
-    maxDecoded:     24,       // memory cap — only this many decoded frames are kept at once; ones far from the current position are released and reloaded later if scrolled back to
     scrollSpan:     160,
     reverse:        true,
     lerp:           1.9,
@@ -427,9 +426,10 @@
   let inFlight=0;
 
   // Don't start downloading the sequence until the visitor is actually approaching it —
-  // on page load this section is well below the fold, and eagerly downloading everything
-  // up front is exactly what was competing with the hero video for bandwidth/memory on
-  // constrained mobile browsers (this is the fix for that).
+  // on page load this section is well below the fold, and downloading everything immediately
+  // is what was competing with the hero video for bandwidth on constrained mobile browsers.
+  // Once triggered, this only affects WHEN loading starts — not which frames get priority
+  // once it does (that's proximity-based, same as before) — so scroll smoothness is unaffected.
   let nearStage=true;
   if('IntersectionObserver' in window){
     nearStage=false;
@@ -437,7 +437,7 @@
       entries.forEach(entry=>{
         if(entry.isIntersecting){ nearStage=true; stageObserver.disconnect(); }
       });
-    }, { rootMargin:'800px 0px 800px 0px' });
+    }, { rootMargin:'1200px 0px 1200px 0px' });
     stageObserver.observe(stage);
   }
 
@@ -494,19 +494,6 @@
     }
     return -1;
   }
-  function evictFar(){
-    // keep only a window of decoded frames around the current position; release the rest
-    // (frames outside the window just get reloaded later if the visitor scrolls back to them —
-    // the LOADING fallback in drawIndex already handles that gracefully)
-    const half=Math.max(6, Math.floor(CONFIG.maxDecoded/2));
-    for(let i=0;i<N;i++){
-      if(status[i]===2 && Math.abs(i-cur)>half){
-        if(images[i] && typeof images[i].close==='function') images[i].close();
-        images[i]=undefined;
-        status[i]=0;
-      }
-    }
-  }
   function drawWaiting(){
     ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
     ctx.fillStyle='rgba(0,74,173,.5)'; ctx.font='13px "IBM Plex Mono", monospace';
@@ -540,7 +527,6 @@
     dir = cur>=lastCur ? 1 : -1; lastCur=cur;
     pump();
     drawIndex(cur);
-    evictFar();
     const driftStart = window.innerHeight*0.16;
     const driftEnd   = -window.innerHeight*0.12;
     driftwrap.style.transform = `translateY(${driftStart+(driftEnd-driftStart)*p}px)`;
